@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ----------------------------------------------------------------------- #
-# Copyright 2017, Gregor von Laszewski, Indiana University                #
+# Copyright 2022, Gregor von Laszewski, University of Vrginia             #
 #                                                                         #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may #
 # not use this file except in compliance with the License. You may obtain #
@@ -32,6 +32,7 @@ cloudmesh-cmd5
 cloudmesh-sys
 cloudmesh-inventory
 cloudmesh-configuration
+xmltodict
 """.split("\n")
 
 # dependency_links = ['http://github.com/nicolaiarocci/eve.git@develop']
