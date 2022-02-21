@@ -5,9 +5,11 @@ from cloudmesh.shell.command import PluginCommand
 from cloudmesh.gpu.gpu import Gpu
 from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
+from cloudmesh.common.console import Console
 from cloudmesh.shell.command import map_parameters
 import xmltodict
 import yaml
+
 
 class GpuCommand(PluginCommand):
 
@@ -18,24 +20,22 @@ class GpuCommand(PluginCommand):
         ::
 
           Usage:
-                gpu --json [--pretty] [-o FILE]
-                gpu --xml [-o FILE]
-                gpu --yaml [-o FILE]
+                gpu --json [--pretty]
+                gpu --xml
+                gpu --yaml
                 gpu processes
                 gpu system
                 gpu status
-                gpu info
-                gpu [-o FILE]
+                gpu
 
-
-
-          This command does some useful things.
-
-          Arguments:
-              FILE   a file name
+          This command returns some information about NVIDIA GPUs if your 
+          system has them.
 
           Options:
-              -o      specify a file to place the output in
+              --json   returns the information in json
+              --xml    returns the information in xml
+              --yaml   returns the information in xml
+
 
         """
 
@@ -47,12 +47,13 @@ class GpuCommand(PluginCommand):
 
         gpu = Gpu()
 
-        if arguments.info:
-            result = "LLLL"
-
-        elif arguments.xml:
-            result = gpu.smi(output="xml")
-
+        if arguments.xml:
+            try:
+                result = gpu.smi(output="xml")
+            except:
+                Console.error("nvidia-smi must be installed on the system")
+                return ""
+            
         elif arguments.json and arguments.pertty:
             result = gpu.smi(output="json")
 
@@ -77,11 +78,12 @@ class GpuCommand(PluginCommand):
         else:
             result = gpu.smi()
 
-        if arguments["-o"]:
-            raise NotImplementedError
-        else:
+
+        try:
             if arguments.pretty:
                 result = json.dumps(result, indent=2)
-            print(result)
+        except:
+            result = None
+        print(result)
 
         return ""
