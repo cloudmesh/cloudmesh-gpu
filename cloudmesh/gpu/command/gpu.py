@@ -45,43 +45,46 @@ class GpuCommand(PluginCommand):
                        "yaml",
                        "pretty")
 
-        gpu = Gpu()
-
-        if arguments.xml:
-            try:
-                result = gpu.smi(output="xml")
-            except:
-                Console.error("nvidia-smi must be installed on the system")
-                return ""
-            
-        elif arguments.json and arguments.pertty:
-            result = gpu.smi(output="json")
-
-        elif arguments.json:
-            result = gpu.smi(output="json")
-
-        elif arguments.yaml:
-            result = gpu.smi(output="yaml")
-
-        elif arguments.processes:
-            arguments.pretty = True
-            result = gpu.processes()
-
-        elif arguments.system:
-            arguments.pretty = True
-            result = gpu.system()
-
-        elif arguments.status:
-            arguments.pretty = True
-            result = gpu.status()
-
-        else:
-            result = gpu.smi()
-
-
         try:
-            if arguments.pretty:
-                result = json.dumps(result, indent=2)
+            gpu = Gpu()
+
+            if arguments.xml:
+                try:
+                    result = gpu.smi(output="xml")
+                except:
+                    Console.error("nvidia-smi must be installed on the system")
+                    return ""
+
+            elif arguments.json and arguments.pertty:
+                result = gpu.smi(output="json")
+
+            elif arguments.json:
+                result = gpu.smi(output="json")
+
+            elif arguments.yaml:
+                result = gpu.smi(output="yaml")
+
+            elif arguments.processes:
+                arguments.pretty = True
+                result = gpu.processes()
+
+            elif arguments.system:
+                arguments.pretty = True
+                result = gpu.system()
+
+            elif arguments.status:
+                arguments.pretty = True
+                result = gpu.status()
+
+            else:
+                result = gpu.smi()
+
+
+            try:
+                if arguments.pretty:
+                    result = json.dumps(result, indent=2)
+            except:
+                result = None
         except:
             result = None
         print(result)
