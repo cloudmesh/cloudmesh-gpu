@@ -7,6 +7,15 @@ class Gpu:
     def __init__(self):
         pass
 
+    def vendor(self):
+        try:
+            r = Shell.run("lspci -vnn | grep VGA -A 12 | fgrep Subsystem:").strip()
+            result = r.split("Subsystem:")[1]
+        except:
+            result = None
+        return result
+
+
     def processes(self):
         result = dict(self.smi(output="json"))
         result = result["nvidia_smi_log"]["gpu"]["processes"]["process_info"]
@@ -69,6 +78,7 @@ class Gpu:
             'processes'
             ]:
             del result[attribute]
+        result["vendor"] = self.vendor()
 
         return result
 
