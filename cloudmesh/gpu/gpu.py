@@ -1,5 +1,6 @@
 import xmltodict
 from cloudmesh.common.Shell import Shell
+import os
 import yaml
 
 class Gpu:
@@ -8,11 +9,18 @@ class Gpu:
         pass
 
     def vendor(self):
-        try:
-            r = Shell.run("lspci -vnn | grep VGA -A 12 | fgrep Subsystem:").strip()
-            result = r.split("Subsystem:")[1]
-        except:
-            result = None
+        if os.name != "nt":
+            try:
+                r = Shell.run("lspci -vnn | grep VGA -A 12 | fgrep Subsystem:").strip()
+                result = r.split("Subsystem:")[1]
+            except:
+                result = None
+        else:
+            try:
+                r = Shell.run("wmic path win32_VideoController get AdapterCompatibility").strip()
+                result = [x.strip() for x in r.split("\r\r\n")[1:]]
+            except Exception:
+                results = None
         return result
 
 
