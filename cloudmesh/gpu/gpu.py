@@ -10,7 +10,7 @@ class Gpu:
     def vendor(self):
         try:
             r = Shell.run("lspci -vnn | grep VGA -A 12 | fgrep Subsystem:").strip()
-            result = r.split("Subsystem:")[1]
+            result = r.split("Subsystem:")[1].strip()
         except:
             result = None
         return result
