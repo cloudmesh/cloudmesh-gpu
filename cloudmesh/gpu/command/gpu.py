@@ -79,11 +79,10 @@ class GpuCommand(PluginCommand):
 
             elif arguments.count:
                 arguments.pretty = True
-                result = gpu.count()
+                result = gpu.count
 
             else:
                 result = gpu.smi()
-
 
             try:
                 if arguments.pretty:

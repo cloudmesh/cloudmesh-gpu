@@ -10,8 +10,10 @@ class Gpu:
 
     @property
     def count(self):
-        raise NotImplementedError
-        number = None # find out how to do
+        try:
+            number = int(Shell.run("nvidia-smi --list-gpus | wc -l").strip())
+        except:
+            number = 0
         return number
 
     def vendor(self):
