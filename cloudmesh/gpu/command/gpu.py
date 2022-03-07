@@ -26,6 +26,7 @@ class GpuCommand(PluginCommand):
                 gpu processes
                 gpu system
                 gpu status
+                gpu count
                 gpu
 
           This command returns some information about NVIDIA GPUs if your 
@@ -75,6 +76,10 @@ class GpuCommand(PluginCommand):
             elif arguments.status:
                 arguments.pretty = True
                 result = gpu.status()
+
+            elif arguments.count:
+                arguments.pretty = True
+                result = gpu.count()
 
             else:
                 result = gpu.smi()

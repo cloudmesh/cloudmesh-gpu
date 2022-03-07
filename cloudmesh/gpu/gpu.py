@@ -8,6 +8,12 @@ class Gpu:
     def __init__(self):
         pass
 
+    @property
+    def count(self):
+        raise NotImplementedError
+        number = None # find out how to do
+        return number
+
     def vendor(self):
         if os.name != "nt":
             try:
