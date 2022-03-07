@@ -1,12 +1,17 @@
 import xmltodict
 from cloudmesh.common.Shell import Shell
+from cloudmesh.common.Printer import Printer
 import os
 import yaml
+
 
 class Gpu:
 
     def __init__(self):
-        pass
+        try:
+            self._smi = dict(self.smi(output="json")["nvidia_smi_log"]["gpu"])
+        except KeyError:
+            raise RuntimeError("nvidia-smi not installed.")
 
     @property
     def count(self):
@@ -34,20 +39,19 @@ class Gpu:
     def processes(self):
         result = None
         try:
-            result = dict(self.smi(output="json"))["nvidia_smi_log"]["gpu"]
+            result = self._smi
             if isinstance(result, list):
                 result = [x['processes']['process_info'] for x in result]
             else:
                 result = result["processes"]["process_info"]
-        except:
+        except KeyError:
             pass
         finally:
             return result
 
     def system(self):
         try:
-            result = dict(self.smi(output="json"))
-            result = result["nvidia_smi_log"]["gpu"]
+            result = self._smi
             # Force list-based GPU handling
             if isinstance(result, dict):
                 result = list(result)
@@ -107,15 +111,14 @@ class Gpu:
                         ]:
                     del result[gpu_instance][attribute]
                     result[gpu_instance]["vendor"] = self.vendor()
-        except:
+        except KeyError:
             pass
         finally:
             return result
 
     def status(self):
         try:
-            result = dict(self.smi(output="json"))
-            result = result["nvidia_smi_log"]["gpu"]
+            result = self._smi()
             # Force list-based GPU handling
             if isinstance(result, dict):
                 result = list(result)
@@ -174,7 +177,7 @@ class Gpu:
                         'processes'
                         ]:
                     del result[attribute]
-        except:
+        except KeyError:
             pass
         finally:
             return result
@@ -184,7 +187,7 @@ class Gpu:
         # json
         # yaml
         try:
-            if output == None:
+            if output is None:
                 result = Shell.run("nvidia-smi")
             else:
                 r = Shell.run("nvidia-smi -q -x")
@@ -198,3 +201,5 @@ class Gpu:
             result = None
         return result
 
+    def __str__(self):
+        Printer.flatwrite(self._smi["nvidia_smi_log"]["gpu"])
