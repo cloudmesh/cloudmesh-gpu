@@ -118,7 +118,7 @@ class Gpu:
         return result
 
     def status(self):
-        result = self._smi()
+        result = self._smi
         try:
             # Force list-based GPU handling
             if isinstance(result, dict):
