@@ -42,7 +42,7 @@ class Gpu:
         result = None
         try:
             # We want to call this each time, as we want the current processes
-            result = dict(self.smi(self, output=None))["nvidia_smi_log"]["gpu"]
+            result = dict(self.smi(self, output="json"))["nvidia_smi_log"]["gpu"]
             if isinstance(result, list):
                 result = [x['processes']['process_info'] for x in result]
             else:
@@ -56,7 +56,7 @@ class Gpu:
         # Force list-based GPU handling
         if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
             result = list(result)
-        for gpu_instance in result:
+        for gpu_instance in range(len(result)):
             for attribute in [
                     '@id',
                     #'product_name',
@@ -122,7 +122,7 @@ class Gpu:
         # Force list-based GPU handling
         if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
             result = list(result)
-        for gpu_instance in result:
+        for gpu_instance in range(len(result)):
             for attribute in [
                     '@id',
                     'product_name',
