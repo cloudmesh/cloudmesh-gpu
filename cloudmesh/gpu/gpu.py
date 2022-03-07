@@ -2,7 +2,8 @@ import collections
 
 import xmltodict
 from cloudmesh.common.Shell import Shell
-from cloudmesh.common.Printer import Printer
+#from cloudmesh.common.Printer import Printer
+import pprint
 import os
 import yaml
 
@@ -202,4 +203,4 @@ class Gpu:
         return result
 
     def __str__(self):
-        return Printer.flatwrite(self._smi).__str__()
+        return pprint.pformat(self._smi, indent=2)
