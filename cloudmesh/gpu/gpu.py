@@ -47,10 +47,10 @@ class Gpu:
                 result = result["processes"]["process_info"]
         except KeyError:
             pass
-        finally:
-            return result
+        return result
 
     def system(self):
+        result = self._smi
         try:
             result = self._smi
             # Force list-based GPU handling
@@ -114,12 +114,12 @@ class Gpu:
                     result[gpu_instance]["vendor"] = self.vendor()
         except KeyError:
             pass
-        finally:
-            return result
+
+        return result
 
     def status(self):
+        result = self._smi()
         try:
-            result = self._smi()
             # Force list-based GPU handling
             if isinstance(result, dict):
                 result = list(result)
@@ -180,8 +180,8 @@ class Gpu:
                     del result[attribute]
         except KeyError:
             pass
-        finally:
-            return result
+
+        return result
 
     def smi(self, output=None):
         # None = text
