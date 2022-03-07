@@ -202,4 +202,4 @@ class Gpu:
         return result
 
     def __str__(self):
-        Printer.flatwrite(self._smi)
+        return Printer.flatwrite(self._smi)
