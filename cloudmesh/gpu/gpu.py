@@ -1,3 +1,5 @@
+import collections
+
 import xmltodict
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.Printer import Printer
@@ -52,7 +54,7 @@ class Gpu:
     def system(self):
         result = self._smi
         # Force list-based GPU handling
-        if isinstance(result, dict):
+        if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
             result = list(result)
         for gpu_instance in result:
             for attribute in [
@@ -118,7 +120,7 @@ class Gpu:
     def status(self):
         result = self._smi
         # Force list-based GPU handling
-        if isinstance(result, dict):
+        if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
             result = list(result)
         for gpu_instance in result:
             for attribute in [
