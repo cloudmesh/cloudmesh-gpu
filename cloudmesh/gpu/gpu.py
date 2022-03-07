@@ -8,6 +8,14 @@ class Gpu:
     def __init__(self):
         pass
 
+    @property
+    def count(self):
+        try:
+            number = int(Shell.run("nvidia-smi --list-gpus | wc -l").strip())
+        except:
+            number = 0
+        return number
+
     def vendor(self):
         if os.name != "nt":
             try:
@@ -23,7 +31,6 @@ class Gpu:
                 results = None
         return result
 
-
     def processes(self):
         result = None
         try:
@@ -38,7 +45,6 @@ class Gpu:
             return result
 
     def system(self):
-        result = None
         try:
             result = dict(self.smi(output="json"))
             result = result["nvidia_smi_log"]["gpu"]
