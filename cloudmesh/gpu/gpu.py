@@ -12,7 +12,9 @@ class Gpu:
 
     def __init__(self):
         try:
-            self._smi = dict(self.smi(output="json"))["nvidia_smi_log"]["gpu"]
+            self._smi = dict(self.smi(output="json"))['nvidia_smi_log']['gpu']
+            if not isinstance(self._smi, list):
+                self._smi = [self._smi]
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
 
@@ -54,10 +56,7 @@ class Gpu:
 
     def system(self):
         result = self._smi
-        # Force list-based GPU handling
-        if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
-            result = list(result)
-        for gpu_instance in range(len(result)):
+        for gpu_instance in range(len(self._smi)):
             for attribute in [
                     '@id',
                     #'product_name',
@@ -120,10 +119,7 @@ class Gpu:
 
     def status(self):
         result = self._smi
-        # Force list-based GPU handling
-        if isinstance(result, dict) or isinstance(result, collections.OrderedDict):
-            result = list(result)
-        for gpu_instance in range(len(result)):
+        for gpu_instance in range(len(self._smi)):
             for attribute in [
                     '@id',
                     'product_name',
@@ -189,7 +185,7 @@ class Gpu:
         # yaml
         try:
             if output is None:
-                result = Shell.run("nvidia-smi")
+                result = Shell.run("nvidia-smi").replace("\r", "")
             else:
                 r = Shell.run("nvidia-smi -q -x")
                 if output == "xml":
