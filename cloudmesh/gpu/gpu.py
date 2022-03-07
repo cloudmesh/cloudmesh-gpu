@@ -9,7 +9,7 @@ class Gpu:
 
     def __init__(self):
         try:
-            self._smi = dict(self.smi(output="json")["nvidia_smi_log"]["gpu"])
+            self._smi = dict(self.smi(output="json"))["nvidia_smi_log"]["gpu"]
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
 
@@ -39,7 +39,8 @@ class Gpu:
     def processes(self):
         result = None
         try:
-            result = self._smi
+            # We want to call this each time, as we want the current processes
+            result = dict(self.smi(self, output=None))["nvidia_smi_log"]["gpu"]
             if isinstance(result, list):
                 result = [x['processes']['process_info'] for x in result]
             else:
