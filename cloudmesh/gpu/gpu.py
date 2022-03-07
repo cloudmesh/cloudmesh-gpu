@@ -172,6 +172,7 @@ class Gpu:
                     result = xmltodict.parse(r)
                 elif output == "yaml":
                     result = yaml.dump(xmltodict.parse(r))
+
         except:
             result = None
         return result
