@@ -51,136 +51,133 @@ class Gpu:
 
     def system(self):
         result = self._smi
-        try:
-            result = self._smi
-            # Force list-based GPU handling
-            if isinstance(result, dict):
-                result = list(result)
-            for gpu_instance in result:
-                for attribute in [
-                        '@id',
-                        #'product_name',
-                        #'product_brand',
-                        #'product_architecture',
-                        'display_mode',
-                        'display_active',
-                        'persistence_mode',
-                        'mig_mode',
-                        'mig_devices',
-                        'accounting_mode',
-                        'accounting_mode_buffer_size',
-                        'driver_model',
-                        'serial',
-                        'uuid',
-                        'minor_number',
-                        #'vbios_version',
-                        'multigpu_board',
-                        'board_id',
-                        'gpu_part_number',
-                        'gpu_module_id',
-                        #'inforom_version',
-                        'gpu_operation_mode',
-                        'gsp_firmware_version',
-                        'gpu_virtualization_mode',
-                        'ibmnpu',
-                        'pci',
-                        'fan_speed',
-                        'performance_state',
-                        'clocks_throttle_reasons',
-                        'fb_memory_usage',
-                        'bar1_memory_usage',
-                        'compute_mode',
-                        'utilization',
-                        'encoder_stats',
-                        'fbc_stats',
-                        'ecc_mode',
-                        'ecc_errors',
-                        'retired_pages',
-                        'remapped_rows',
-                        'temperature',
-                        'supported_gpu_target_temp',
-                        'power_readings',
-                        'clocks',
-                        'applications_clocks',
-                        'default_applications_clocks',
-                        'max_clocks',
-                        'max_customer_boost_clocks',
-                        'clock_policy',
-                        'voltage',
-                        'supported_clocks',
-                        'processes'
-                        ]:
+        # Force list-based GPU handling
+        if isinstance(result, dict):
+            result = list(result)
+        for gpu_instance in result:
+            for attribute in [
+                    '@id',
+                    #'product_name',
+                    #'product_brand',
+                    #'product_architecture',
+                    'display_mode',
+                    'display_active',
+                    'persistence_mode',
+                    'mig_mode',
+                    'mig_devices',
+                    'accounting_mode',
+                    'accounting_mode_buffer_size',
+                    'driver_model',
+                    'serial',
+                    'uuid',
+                    'minor_number',
+                    #'vbios_version',
+                    'multigpu_board',
+                    'board_id',
+                    'gpu_part_number',
+                    'gpu_module_id',
+                    #'inforom_version',
+                    'gpu_operation_mode',
+                    'gsp_firmware_version',
+                    'gpu_virtualization_mode',
+                    'ibmnpu',
+                    'pci',
+                    'fan_speed',
+                    'performance_state',
+                    'clocks_throttle_reasons',
+                    'fb_memory_usage',
+                    'bar1_memory_usage',
+                    'compute_mode',
+                    'utilization',
+                    'encoder_stats',
+                    'fbc_stats',
+                    'ecc_mode',
+                    'ecc_errors',
+                    'retired_pages',
+                    'remapped_rows',
+                    'temperature',
+                    'supported_gpu_target_temp',
+                    'power_readings',
+                    'clocks',
+                    'applications_clocks',
+                    'default_applications_clocks',
+                    'max_clocks',
+                    'max_customer_boost_clocks',
+                    'clock_policy',
+                    'voltage',
+                    'supported_clocks',
+                    'processes'
+                    ]:
+                try:
                     del result[gpu_instance][attribute]
                     result[gpu_instance]["vendor"] = self.vendor()
-        except KeyError:
-            pass
-
+                except KeyError:
+                    pass
         return result
 
     def status(self):
         result = self._smi
-        try:
-            # Force list-based GPU handling
-            if isinstance(result, dict):
-                result = list(result)
-            for gpu_instance in result:
-                for attribute in [
-                        '@id',
-                        'product_name',
-                        'product_brand',
-                        'product_architecture',
-                        'display_mode',
-                        'display_active',
-                        'persistence_mode',
-                        'mig_mode',
-                        'mig_devices',
-                        'accounting_mode',
-                        'accounting_mode_buffer_size',
-                        'driver_model',
-                        'serial',
-                        'uuid',
-                        'minor_number',
-                        'vbios_version',
-                        'multigpu_board',
-                        'board_id',
-                        'gpu_part_number',
-                        'gpu_module_id',
-                        'inforom_version',
-                        'gpu_operation_mode',
-                        'gsp_firmware_version',
-                        'gpu_virtualization_mode',
-                        'ibmnpu',
-                        'pci',
-                        #'fan_speed',
-                        'performance_state',
-                        'clocks_throttle_reasons',
-                        'fb_memory_usage',
-                        'bar1_memory_usage',
-                        'compute_mode',
-                        #'utilization',
-                        'encoder_stats',
-                        'fbc_stats',
-                        'ecc_mode',
-                        'ecc_errors',
-                        'retired_pages',
-                        'remapped_rows',
-                        #'temperature',
-                        #'supported_gpu_target_temp',
-                        #'power_readings',
-                        #'clocks',
-                        'applications_clocks',
-                        'default_applications_clocks',
-                        'max_clocks',
-                        'max_customer_boost_clocks',
-                        'clock_policy',
-                        #'voltage',
-                        'supported_clocks',
-                        'processes'
-                        ]:
-                    del result[attribute]
-        except KeyError:
-            pass
-
+        # Force list-based GPU handling
+        if isinstance(result, dict):
+            result = list(result)
+        for gpu_instance in result:
+            for attribute in [
+                    '@id',
+                    'product_name',
+                    'product_brand',
+                    'product_architecture',
+                    'display_mode',
+                    'display_active',
+                    'persistence_mode',
+                    'mig_mode',
+                    'mig_devices',
+                    'accounting_mode',
+                    'accounting_mode_buffer_size',
+                    'driver_model',
+                    'serial',
+                    'uuid',
+                    'minor_number',
+                    'vbios_version',
+                    'multigpu_board',
+                    'board_id',
+                    'gpu_part_number',
+                    'gpu_module_id',
+                    'inforom_version',
+                    'gpu_operation_mode',
+                    'gsp_firmware_version',
+                    'gpu_virtualization_mode',
+                    'ibmnpu',
+                    'pci',
+                    #'fan_speed',
+                    'performance_state',
+                    'clocks_throttle_reasons',
+                    'fb_memory_usage',
+                    'bar1_memory_usage',
+                    'compute_mode',
+                    #'utilization',
+                    'encoder_stats',
+                    'fbc_stats',
+                    'ecc_mode',
+                    'ecc_errors',
+                    'retired_pages',
+                    'remapped_rows',
+                    #'temperature',
+                    #'supported_gpu_target_temp',
+                    #'power_readings',
+                    #'clocks',
+                    'applications_clocks',
+                    'default_applications_clocks',
+                    'max_clocks',
+                    'max_customer_boost_clocks',
+                    'clock_policy',
+                    #'voltage',
+                    'supported_clocks',
+                    'processes'
+                    ]:
+                try:
+                    del result[gpu_instance][attribute]
+                except KeyError:
+                    pass
         return result
 
     def smi(self, output=None):
