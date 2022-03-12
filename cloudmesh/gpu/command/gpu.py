@@ -20,6 +20,7 @@ class GpuCommand(PluginCommand):
         ::
 
           Usage:
+                gpu watch [--delay=SECONDS] [--logfile=LOGFILE]
                 gpu --json [--pretty]
                 gpu --xml
                 gpu --yaml
@@ -33,23 +34,34 @@ class GpuCommand(PluginCommand):
           system has them.
 
           Options:
-              --json   returns the information in json
-              --xml    returns the information in xml
-              --yaml   returns the information in xml
-
+              --json              returns the information in json
+              --xml               returns the information in xml
+              --yaml              returns the information in xml
+              --logfile=LOGFILE   the logfile
 
         """
+
+        VERBOSE(arguments)
 
         map_parameters(arguments,
                        "json",
                        "xml",
                        "yaml",
-                       "pretty")
+                       "pretty",
+                       "delay",
+                       "logfile")
 
         try:
             gpu = Gpu()
 
-            if arguments.xml:
+            if arguments.watch:
+
+                gpu.watch(logfile=arguments.logfile,
+                          delay=arguments.delay)
+
+                return ""
+
+            elif arguments.xml:
                 try:
                     result = gpu.smi(output="xml")
                 except:
@@ -80,6 +92,7 @@ class GpuCommand(PluginCommand):
             elif arguments.count:
                 arguments.pretty = True
                 result = gpu.count
+
 
             else:
                 result = gpu.smi()

@@ -1,4 +1,6 @@
 import collections
+import sys
+import time
 
 import xmltodict
 from cloudmesh.common.Shell import Shell
@@ -6,17 +8,36 @@ from cloudmesh.common.Shell import Shell
 import pprint
 import os
 import yaml
-
+from signal import signal, SIGINT
+from cloudmesh.common.dotdict import dotdict
 
 class Gpu:
 
     def __init__(self):
+        self.running = True
         try:
             self._smi = dict(self.smi(output="json"))['nvidia_smi_log']['gpu']
             if not isinstance(self._smi, list):
                 self._smi = [self._smi]
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
+
+
+    def exit_handler(self, signal_received, frame):
+        """
+        Kube manager has a build in Benchmark framework. In case you
+        press CTRL-C, this handler asures that the benchmarks will be printed.
+
+        :param signal_received:
+        :type signal_received:
+        :param frame:
+        :type frame:
+        :return:
+        :rtype:
+        """
+        # Handle any cleanup here
+        print('SIGINT or CTRL-C detected. Exiting gracefully')
+        self.running = False
 
     @property
     def count(self):
@@ -197,6 +218,44 @@ class Gpu:
         except:
             result = None
         return result
+
+    def watch(self, logfile=None, delay=1):
+
+        try:
+            delay=int(delay)
+        except Exception as e:
+            delay = 1
+
+        signal(SIGINT, self.exit_handler)
+
+        stream = sys.stdout
+        if logfile is None:
+            stream = sys.stdout
+        else:
+            stream = open(logfile, "w")
+        while self.running:
+            try:
+                data = self.smi(output="json")
+
+                utilization = dotdict(data["nvidia_smi_log"]["gpu"]["utilization"])
+                temperature = dotdict(data["nvidia_smi_log"]["gpu"]["temperature"])
+                power = dotdict(data["nvidia_smi_log"]["gpu"]["power_readings"])
+
+                #
+                # have alternative format without spaces
+                #
+                result = \
+                    f"{utilization.gpu_util[:-2]: >3}, " \
+                    f"{utilization.memory_util[:-2]: >3}, " \
+                    f"{utilization.encoder_util[:-2]: >3}, " \
+                    f"{utilization.decoder_util[:-2]: >3}, " \
+                    f"{temperature.gpu_temp[:-2]: >5}, " \
+                    f"{power.power_draw[:-2]: >8}"
+
+                print (result)
+
+            except Exception as e:
+                print (e)
 
     def __str__(self):
         return pprint.pformat(self._smi, indent=2)
