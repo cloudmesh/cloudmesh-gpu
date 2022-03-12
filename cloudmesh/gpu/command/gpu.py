@@ -20,7 +20,7 @@ class GpuCommand(PluginCommand):
         ::
 
           Usage:
-                gpu watch [--delay=SECONDS] [--logfile=LOGFILE]
+                gpu watch [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
                 gpu --json [--pretty]
                 gpu --xml
                 gpu --yaml
@@ -38,10 +38,11 @@ class GpuCommand(PluginCommand):
               --xml               returns the information in xml
               --yaml              returns the information in xml
               --logfile=LOGFILE   the logfile
-
+              --count=COUNT       how many times the watch is run
+              --dense             do not print any spaces [default: False]
         """
 
-        # VERBOSE(arguments)
+        VERBOSE(arguments)
 
         map_parameters(arguments,
                        "json",
@@ -49,15 +50,19 @@ class GpuCommand(PluginCommand):
                        "yaml",
                        "pretty",
                        "delay",
-                       "logfile")
+                       "logfile"
+                       )
 
         try:
             gpu = Gpu()
 
+
             if arguments.watch:
 
                 gpu.watch(logfile=arguments.logfile,
-                          delay=arguments.delay)
+                          delay=arguments.delay,
+                          repeated=int(arguments["--count"]),
+                          dense=arguments["--dense"])
 
                 return ""
 
@@ -92,7 +97,6 @@ class GpuCommand(PluginCommand):
             elif arguments.count:
                 arguments.pretty = True
                 result = gpu.count
-
 
             else:
                 result = gpu.smi()

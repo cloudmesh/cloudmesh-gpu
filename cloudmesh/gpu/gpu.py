@@ -225,7 +225,12 @@ class Gpu:
             result = None
         return result
 
-    def watch(self, logfile=None, delay=1):
+    def watch(self, logfile=None, delay=1, repeated=None, dense=False):
+
+        if repeated is None:
+            repeated = -1
+        else:
+            repeated = int(repeated)
 
         try:
             delay=int(delay)
@@ -243,8 +248,13 @@ class Gpu:
         print("# ####################################################################################")
         print ("# time, gpu_util %, memory_util %, encoder_util %, decoder_util %, gpu_temp C, power_draw W")
 
+        counter = repeated
+
         while self.running:
             try:
+                if counter > 0:
+                    counter = counter - 1
+                    self.running = self.running and counter > 0
                 today = date.today()
                 now = datetime.now().time()  # time object
                 data = self.smi(output="json")
@@ -265,6 +275,8 @@ class Gpu:
                     f"{temperature.gpu_temp[:-2]: >5}, " \
                     f"{power.power_draw[:-2]: >8}"
 
+                if dense:
+                    result = result.replace(" ", "")
                 print (result, file=stream)
 
             except Exception as e:
