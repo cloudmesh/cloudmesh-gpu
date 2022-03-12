@@ -10,10 +10,16 @@ import os
 import yaml
 from signal import signal, SIGINT
 from cloudmesh.common.dotdict import dotdict
+from datetime import date
+
+from datetime import datetime
+
+
 
 class Gpu:
 
     def __init__(self):
+
         self.running = True
         try:
             self._smi = dict(self.smi(output="json"))['nvidia_smi_log']['gpu']
@@ -233,8 +239,14 @@ class Gpu:
             stream = sys.stdout
         else:
             stream = open(logfile, "w")
+
+        print("# ####################################################################################")
+        print ("# time, gpu_util %, memory_util %, encoder_util %, decoder_util %, gpu_temp C, power_draw W")
+
         while self.running:
             try:
+                today = date.today()
+                now = datetime.now().time()  # time object
                 data = self.smi(output="json")
 
                 utilization = dotdict(data["nvidia_smi_log"]["gpu"]["utilization"])
@@ -245,6 +257,7 @@ class Gpu:
                 # have alternative format without spaces
                 #
                 result = \
+                    f"{today} {now}, " \
                     f"{utilization.gpu_util[:-2]: >3}, " \
                     f"{utilization.memory_util[:-2]: >3}, " \
                     f"{utilization.encoder_util[:-2]: >3}, " \
@@ -252,7 +265,7 @@ class Gpu:
                     f"{temperature.gpu_temp[:-2]: >5}, " \
                     f"{power.power_draw[:-2]: >8}"
 
-                print (result)
+                print (result, file=stream)
 
             except Exception as e:
                 print (e)
