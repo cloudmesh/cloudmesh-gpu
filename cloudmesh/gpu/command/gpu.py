@@ -41,7 +41,7 @@ class GpuCommand(PluginCommand):
 
         """
 
-        VERBOSE(arguments)
+        # VERBOSE(arguments)
 
         map_parameters(arguments,
                        "json",
