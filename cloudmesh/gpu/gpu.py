@@ -258,7 +258,10 @@ class Gpu:
             stream = open(logfile, "w")
 
         print("# ####################################################################################")
-        print ("# time, gpu_util %, memory_util %, encoder_util %, decoder_util %, gpu_temp C, power_draw W")
+        print ("# time, ", end = "")
+        for i in range(self.count):
+            print (f"{i} gpu_util %, {i} memory_util %, {i} encoder_util %, {i} decoder_util %, {i} gpu_temp C, {i} power_draw W", end="")
+        print()
 
         counter = repeated
 
