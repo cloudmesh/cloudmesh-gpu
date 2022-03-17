@@ -79,6 +79,8 @@ class Gpu:
                 result = result["processes"]["process_info"]
         except KeyError:
             pass
+        except Exception as e:
+            print (e)
         return result
 
     def system(self):
