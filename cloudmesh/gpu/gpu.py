@@ -221,13 +221,19 @@ class Gpu:
                 r = readfile(filename)
             else:
                 r = Shell.run("nvidia-smi -q -x")
-                if output == "xml":
-                    result = r
-                elif output == "json":
-                    result = xmltodict.parse(r)
-                elif output == "yaml":
-                    result = yaml.dump(xmltodict.parse(r))
-        except:
+            if output == "xml":
+                result = r
+            elif output == "json":
+                result = xmltodict.parse(r)
+
+                if int(result["nvidia_smi_log"]["attached_gpus"]) == 1:
+                    data = result["nvidia_smi_log"]["gpu"]
+                    result["nvidia_smi_log"]["gpu"] = [data]
+
+            elif output == "yaml":
+                result = yaml.dump(xmltodict.parse(r))
+        except Exception as e:
+            print (e)
             result = None
         return result
 
@@ -265,22 +271,25 @@ class Gpu:
                 now = datetime.now().time()  # time object
                 data = self.smi(output="json")
 
-                utilization = dotdict(data["nvidia_smi_log"]["gpu"]["utilization"])
-                temperature = dotdict(data["nvidia_smi_log"]["gpu"]["temperature"])
-                power = dotdict(data["nvidia_smi_log"]["gpu"]["power_readings"])
+                result = [f"{today} {now}"]
+                for gpu in range(self.count):
+                    utilization = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["utilization"])
+                    temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
+                    power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["power_readings"])
 
-                #
-                # have alternative format without spaces
-                #
-                result = \
-                    f"{today} {now}, " \
-                    f"{utilization.gpu_util[:-2]: >3}, " \
-                    f"{utilization.memory_util[:-2]: >3}, " \
-                    f"{utilization.encoder_util[:-2]: >3}, " \
-                    f"{utilization.decoder_util[:-2]: >3}, " \
-                    f"{temperature.gpu_temp[:-2]: >5}, " \
-                    f"{power.power_draw[:-2]: >8}"
+                    #
+                    # have alternative format without spaces
+                    #
+                    line = \
+                        f"{utilization.gpu_util[:-2]: >3}, " \
+                        f"{utilization.memory_util[:-2]: >3}, " \
+                        f"{utilization.encoder_util[:-2]: >3}, " \
+                        f"{utilization.decoder_util[:-2]: >3}, " \
+                        f"{temperature.gpu_temp[:-2]: >5}, " \
+                        f"{power.power_draw[:-2]: >8}"
+                    result.append(line)
 
+                result = ", ".join(result)
                 if dense:
                     result = result.replace(" ", "")
                 print (result, file=stream)

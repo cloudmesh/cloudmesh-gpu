@@ -44,7 +44,7 @@ class GpuCommand(PluginCommand):
               --dense             do not print any spaces [default: False]
         """
 
-        VERBOSE(arguments)
+        # VERBOSE(arguments)
 
         map_parameters(arguments,
                        "json",
