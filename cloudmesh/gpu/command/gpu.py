@@ -6,6 +6,7 @@ from cloudmesh.gpu.gpu import Gpu
 from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.console import Console
+from cloudmesh.common.Shell import Shell
 from cloudmesh.shell.command import map_parameters
 import xmltodict
 import yaml
@@ -21,13 +22,14 @@ class GpuCommand(PluginCommand):
 
           Usage:
                 gpu watch [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
-                gpu --json [--pretty]
+                gpu --json [--pretty] [FILE]
                 gpu --xml
                 gpu --yaml
                 gpu processes
                 gpu system
                 gpu status
                 gpu count
+                gpu kill
                 gpu
 
           This command returns some information about NVIDIA GPUs if your 
@@ -38,7 +40,7 @@ class GpuCommand(PluginCommand):
               --xml               returns the information in xml
               --yaml              returns the information in xml
               --logfile=LOGFILE   the logfile
-              --count=COUNT       how many times the watch is run
+              --count=COUNT       how many times the watch is run [default: -1]
               --dense             do not print any spaces [default: False]
         """
 
@@ -66,6 +68,16 @@ class GpuCommand(PluginCommand):
 
                 return ""
 
+            elif arguments.kill:
+
+                r = Shell.run('ps -ax | fgrep "cms gpu watch"').splitlines()
+                for entry in r:
+                    if "python" in entry:
+                        pid = entry.strip().split()[0]
+                        Shell.kill_pid(pid)
+
+                return ""
+
             elif arguments.xml:
                 try:
                     result = gpu.smi(output="xml")
@@ -74,10 +86,12 @@ class GpuCommand(PluginCommand):
                     return ""
 
             elif arguments.json and arguments.pertty:
-                result = gpu.smi(output="json")
+                filename = arguments.FILE
+                result = gpu.smi(output="json", filename=filename)
 
             elif arguments.json:
-                result = gpu.smi(output="json")
+                filename = arguments.FILE
+                result = gpu.smi(output="json", filename=filename)
 
             elif arguments.yaml:
                 result = gpu.smi(output="yaml")

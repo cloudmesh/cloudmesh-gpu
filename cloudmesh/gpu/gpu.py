@@ -11,7 +11,7 @@ import yaml
 from signal import signal, SIGINT
 from cloudmesh.common.dotdict import dotdict
 from datetime import date
-
+from cloudmesh.common.util import readfile
 from datetime import datetime
 
 
@@ -206,13 +206,17 @@ class Gpu:
                     pass
         return result
 
-    def smi(self, output=None):
+    def smi(self, output=None, filename=None):
         # None = text
         # json
         # yaml
         try:
-            if output is None:
+            if filename is None and output is None:
                 result = Shell.run("nvidia-smi").replace("\r", "")
+                return result
+
+            if filename is not None:
+                r = readfile(filename)
             else:
                 r = Shell.run("nvidia-smi -q -x")
                 if output == "xml":
@@ -225,7 +229,7 @@ class Gpu:
             result = None
         return result
 
-    def watch(self, logfile=None, delay=1, repeated=None, dense=False):
+    def watch(self, logfile=None, delay=1.0, repeated=None, dense=False):
 
         if repeated is None:
             repeated = -1
@@ -233,9 +237,9 @@ class Gpu:
             repeated = int(repeated)
 
         try:
-            delay=int(delay)
+            delay=float(delay)
         except Exception as e:
-            delay = 1
+            delay = 1.0
 
         signal(SIGINT, self.exit_handler)
 
