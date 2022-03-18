@@ -4,7 +4,7 @@
 Note: This file is automatically created. Please do not modify it.
       Please change the code instead.
 
-"""
+```
 
   Usage:
         gpu watch [--gpu=GPU] [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
@@ -177,4 +177,4 @@ Note: This file is automatically created. Please do not modify it.
 
 
 
-"""
+```

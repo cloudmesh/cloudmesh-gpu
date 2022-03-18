@@ -16,9 +16,9 @@ readme:
 	@echo "Note: This file is automatically created. Please do not modify it." >> README.md
 	@echo "      Please change the code instead." >> README.md
 	@echo >> README.md
-	@echo \"\"\" >> README.md
+	@echo \`\`\` >> README.md
 	cms help gpu | tail -n +6 >> README.md
-	@echo \"\"\" >> README.md
+	@echo \`\`\` >> README.md
 
 	@cms debug on
 
