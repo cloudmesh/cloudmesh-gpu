@@ -7,10 +7,11 @@ from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.console import Console
 from cloudmesh.common.Shell import Shell
+from cloudmesh.common.Printer import Printer
 from cloudmesh.shell.command import map_parameters
 import xmltodict
 import yaml
-
+from cloudmesh.common.parameter import Parameter
 
 class GpuCommand(PluginCommand):
 
@@ -25,7 +26,7 @@ class GpuCommand(PluginCommand):
                 gpu --json [--pretty] [FILE]
                 gpu --xml
                 gpu --yaml
-                gpu processes
+                gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
                 gpu system
                 gpu status
                 gpu count
@@ -42,9 +43,11 @@ class GpuCommand(PluginCommand):
               --logfile=LOGFILE   the logfile
               --count=COUNT       how many times the watch is run [default: -1]
               --dense             do not print any spaces [default: False]
+              --detail            short process names [default: False]
+              --format=FORMAT     table, json, yaml [default: table]
+              --gpu=GPUS
         """
 
-        # VERBOSE(arguments)
 
         map_parameters(arguments,
                        "json",
@@ -52,11 +55,31 @@ class GpuCommand(PluginCommand):
                        "yaml",
                        "pretty",
                        "delay",
-                       "logfile"
+                       "logfile",
+                       "table",
+                       "detail",
+                       "output"
                        )
+        arguments.format = arguments["--format"]
+        arguments.gpu = Parameter.expand(arguments["--gpu"])
+
+        # VERBOSE(arguments)
+
+
+        def _select(d, what):
+            result = []
+            counter = 0
+            for entry in d:
+                counter = counter + 1
+                if str(counter) in what:
+                    result.append(entry)
+            return result
+
+
 
         try:
             gpu = Gpu()
+
 
 
             if arguments.watch:
@@ -99,14 +122,36 @@ class GpuCommand(PluginCommand):
             elif arguments.processes:
                 arguments.pretty = True
                 result = gpu.processes()
+                d = []
+                counter = 0
+                for i in result.keys():
+                    if str(i) in arguments.gpu:
+                        for p in result[i]:
+                            counter = counter + 1
+                            p["gpu"] = i
+                            p["job"] = counter
+                            p = dict(p)
+                            if not arguments.detail:
+                                p["process_name"] = p["process_name"].split()[0].strip()
+                                try:
+                                    p["process_name"] = p["process_name"].split("/")[-1]
+                                except:
+                                    pass
+                            d.append(p)
+                    print(Printer.write(d,
+                                        output=arguments.format,
+                                        order=["job", "gpu", "pid",  "type", "used_memory", "compute_instance_id",  "gpu_instance_id", "process_name"]))
+                return ""
 
             elif arguments.system:
                 arguments.pretty = True
                 result = gpu.system()
+                # result  = _select(result, arguments.gpu)
 
             elif arguments.status:
                 arguments.pretty = True
                 result = gpu.status()
+                # result  = _select(result, arguments.gpu)
 
             elif arguments.count:
                 arguments.pretty = True
@@ -114,14 +159,17 @@ class GpuCommand(PluginCommand):
 
             else:
                 result = gpu.smi()
+                # result  = _select(result, arguments.gpu)
 
             try:
                 if arguments.pretty:
+                    # result = _select(result, arguments.gpu)
                     result = json.dumps(result, indent=2)
             except:
                 result = None
         except:
             result = None
+
         print(result)
 
         return ""

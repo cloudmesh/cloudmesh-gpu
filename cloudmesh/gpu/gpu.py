@@ -69,16 +69,13 @@ class Gpu:
         return result
 
     def processes(self):
-        result = None
+        result = {}
         try:
             # We want to call this each time, as we want the current processes
-            result = dict(self.smi(self, output="json"))["nvidia_smi_log"]["gpu"]
-            if isinstance(result, list):
-                result = [x['processes']['process_info'] for x in result]
-            else:
-                result = result["processes"]["process_info"]
-        except KeyError:
-            pass
+            data = dict(self.smi(output="json"))["nvidia_smi_log"]['gpu']
+            for i in range(self.count):
+                information = data[i]["processes"]["process_info"]
+                result[i] = information
         except Exception as e:
             print (e)
         return result
