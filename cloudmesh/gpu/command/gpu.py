@@ -1,17 +1,14 @@
 import json
 
-from cloudmesh.shell.command import command
-from cloudmesh.shell.command import PluginCommand
-from cloudmesh.gpu.gpu import Gpu
-from pprint import pprint
-from cloudmesh.common.debug import VERBOSE
-from cloudmesh.common.console import Console
-from cloudmesh.common.Shell import Shell
 from cloudmesh.common.Printer import Printer
-from cloudmesh.shell.command import map_parameters
-import xmltodict
-import yaml
+from cloudmesh.common.Shell import Shell
+from cloudmesh.common.console import Console
 from cloudmesh.common.parameter import Parameter
+from cloudmesh.gpu.gpu import Gpu
+from cloudmesh.shell.command import PluginCommand
+from cloudmesh.shell.command import command
+from cloudmesh.shell.command import map_parameters
+
 
 class GpuCommand(PluginCommand):
 
@@ -48,7 +45,6 @@ class GpuCommand(PluginCommand):
               --gpu=GPUS
         """
 
-
         map_parameters(arguments,
                        "json",
                        "xml",
@@ -64,7 +60,6 @@ class GpuCommand(PluginCommand):
         arguments.gpu = Parameter.expand(arguments["--gpu"])
 
         # VERBOSE(arguments)
-
 
         def _select(d, what):
             try:
@@ -84,11 +79,8 @@ class GpuCommand(PluginCommand):
                 print(e)
             return d
 
-
         try:
             gpu = Gpu()
-
-
 
             if arguments.watch:
 
@@ -127,11 +119,11 @@ class GpuCommand(PluginCommand):
                 result = gpu.smi(output="json", filename=filename)
                 result = _select(result, arguments.gpu)
 
-
             elif arguments.yaml:
                 result = gpu.smi(output="yaml")
 
             elif arguments.processes:
+
                 arguments.pretty = True
                 result = gpu.processes()
                 d = []
@@ -152,7 +144,8 @@ class GpuCommand(PluginCommand):
                             d.append(p)
                     print(Printer.write(d,
                                         output=arguments.format,
-                                        order=["job", "gpu", "pid",  "type", "used_memory", "compute_instance_id",  "gpu_instance_id", "process_name"]))
+                                        order=["job", "gpu", "pid", "type", "used_memory", "compute_instance_id",
+                                               "gpu_instance_id", "process_name"]))
                 return ""
 
             elif arguments.system:

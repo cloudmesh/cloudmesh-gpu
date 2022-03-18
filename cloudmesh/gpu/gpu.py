@@ -1,19 +1,17 @@
-import collections
+import os
+# from cloudmesh.common.Printer import Printer
+import pprint
 import sys
-import time
+from datetime import date
+from datetime import datetime
+from signal import signal, SIGINT
 
 import xmltodict
-from cloudmesh.common.Shell import Shell
-#from cloudmesh.common.Printer import Printer
-import pprint
-import os
 import yaml
-from signal import signal, SIGINT
-from cloudmesh.common.dotdict import dotdict
-from datetime import date
-from cloudmesh.common.util import readfile
-from datetime import datetime
 
+from cloudmesh.common.Shell import Shell
+from cloudmesh.common.dotdict import dotdict
+from cloudmesh.common.util import readfile
 
 
 class Gpu:
@@ -32,7 +30,7 @@ class Gpu:
     def exit_handler(self, signal_received, frame):
         """
         Kube manager has a build in Benchmark framework. In case you
-        press CTRL-C, this handler asures that the benchmarks will be printed.
+        press CTRL-C, this handler assures that the benchmarks will be printed.
 
         :param signal_received:
         :type signal_received:
@@ -69,26 +67,6 @@ class Gpu:
                 results = None
         return result
 
-        def select(self, d, what):
-            try:
-                selected = []
-                data = dict(gpu.smi(output="json"))["nvidia_smi_log"]['gpu']
-                selection = [int(i) for i in what]
-                # selected = [data[i] for i in selection]
-                # this way we can pass numbers which do not exist
-                selected = []
-                for i in selection:
-                    try:
-                        selected.append(data[i])
-                    except:
-                        pass
-                d["nvidia_smi_log"]['gpu'] = selected
-            except Exception as e:
-                print(e)
-            return d
-
-
-
     def processes(self):
         result = {}
         try:
@@ -98,65 +76,65 @@ class Gpu:
                 information = data[i]["processes"]["process_info"]
                 result[i] = information
         except Exception as e:
-            print (e)
+            print(e)
         return result
 
     def system(self):
         result = self._smi
         for gpu_instance in range(len(self._smi)):
             for attribute in [
-                    '@id',
-                    #'product_name',
-                    #'product_brand',
-                    #'product_architecture',
-                    'display_mode',
-                    'display_active',
-                    'persistence_mode',
-                    'mig_mode',
-                    'mig_devices',
-                    'accounting_mode',
-                    'accounting_mode_buffer_size',
-                    'driver_model',
-                    'serial',
-                    'uuid',
-                    'minor_number',
-                    #'vbios_version',
-                    'multigpu_board',
-                    'board_id',
-                    'gpu_part_number',
-                    'gpu_module_id',
-                    #'inforom_version',
-                    'gpu_operation_mode',
-                    'gsp_firmware_version',
-                    'gpu_virtualization_mode',
-                    'ibmnpu',
-                    'pci',
-                    'fan_speed',
-                    'performance_state',
-                    'clocks_throttle_reasons',
-                    'fb_memory_usage',
-                    'bar1_memory_usage',
-                    'compute_mode',
-                    'utilization',
-                    'encoder_stats',
-                    'fbc_stats',
-                    'ecc_mode',
-                    'ecc_errors',
-                    'retired_pages',
-                    'remapped_rows',
-                    'temperature',
-                    'supported_gpu_target_temp',
-                    'power_readings',
-                    'clocks',
-                    'applications_clocks',
-                    'default_applications_clocks',
-                    'max_clocks',
-                    'max_customer_boost_clocks',
-                    'clock_policy',
-                    'voltage',
-                    'supported_clocks',
-                    'processes'
-                    ]:
+                '@id',
+                # 'product_name',
+                # 'product_brand',
+                # 'product_architecture',
+                'display_mode',
+                'display_active',
+                'persistence_mode',
+                'mig_mode',
+                'mig_devices',
+                'accounting_mode',
+                'accounting_mode_buffer_size',
+                'driver_model',
+                'serial',
+                'uuid',
+                'minor_number',
+                # 'vbios_version',
+                'multigpu_board',
+                'board_id',
+                'gpu_part_number',
+                'gpu_module_id',
+                # 'inforom_version',
+                'gpu_operation_mode',
+                'gsp_firmware_version',
+                'gpu_virtualization_mode',
+                'ibmnpu',
+                'pci',
+                'fan_speed',
+                'performance_state',
+                'clocks_throttle_reasons',
+                'fb_memory_usage',
+                'bar1_memory_usage',
+                'compute_mode',
+                'utilization',
+                'encoder_stats',
+                'fbc_stats',
+                'ecc_mode',
+                'ecc_errors',
+                'retired_pages',
+                'remapped_rows',
+                'temperature',
+                'supported_gpu_target_temp',
+                'power_readings',
+                'clocks',
+                'applications_clocks',
+                'default_applications_clocks',
+                'max_clocks',
+                'max_customer_boost_clocks',
+                'clock_policy',
+                'voltage',
+                'supported_clocks',
+                'processes'
+            ]:
                 try:
                     del result[gpu_instance][attribute]
                     result[gpu_instance]["vendor"] = self.vendor()
@@ -168,58 +146,58 @@ class Gpu:
         result = self._smi
         for gpu_instance in range(len(self._smi)):
             for attribute in [
-                    '@id',
-                    'product_name',
-                    'product_brand',
-                    'product_architecture',
-                    'display_mode',
-                    'display_active',
-                    'persistence_mode',
-                    'mig_mode',
-                    'mig_devices',
-                    'accounting_mode',
-                    'accounting_mode_buffer_size',
-                    'driver_model',
-                    'serial',
-                    'uuid',
-                    'minor_number',
-                    'vbios_version',
-                    'multigpu_board',
-                    'board_id',
-                    'gpu_part_number',
-                    'gpu_module_id',
-                    'inforom_version',
-                    'gpu_operation_mode',
-                    'gsp_firmware_version',
-                    'gpu_virtualization_mode',
-                    'ibmnpu',
-                    'pci',
-                    #'fan_speed',
-                    'performance_state',
-                    'clocks_throttle_reasons',
-                    'fb_memory_usage',
-                    'bar1_memory_usage',
-                    'compute_mode',
-                    #'utilization',
-                    'encoder_stats',
-                    'fbc_stats',
-                    'ecc_mode',
-                    'ecc_errors',
-                    'retired_pages',
-                    'remapped_rows',
-                    #'temperature',
-                    #'supported_gpu_target_temp',
-                    #'power_readings',
-                    #'clocks',
-                    'applications_clocks',
-                    'default_applications_clocks',
-                    'max_clocks',
-                    'max_customer_boost_clocks',
-                    'clock_policy',
-                    #'voltage',
-                    'supported_clocks',
-                    'processes'
-                    ]:
+                '@id',
+                'product_name',
+                'product_brand',
+                'product_architecture',
+                'display_mode',
+                'display_active',
+                'persistence_mode',
+                'mig_mode',
+                'mig_devices',
+                'accounting_mode',
+                'accounting_mode_buffer_size',
+                'driver_model',
+                'serial',
+                'uuid',
+                'minor_number',
+                'vbios_version',
+                'multigpu_board',
+                'board_id',
+                'gpu_part_number',
+                'gpu_module_id',
+                'inforom_version',
+                'gpu_operation_mode',
+                'gsp_firmware_version',
+                'gpu_virtualization_mode',
+                'ibmnpu',
+                'pci',
+                # 'fan_speed',
+                'performance_state',
+                'clocks_throttle_reasons',
+                'fb_memory_usage',
+                'bar1_memory_usage',
+                'compute_mode',
+                # 'utilization',
+                'encoder_stats',
+                'fbc_stats',
+                'ecc_mode',
+                'ecc_errors',
+                'retired_pages',
+                'remapped_rows',
+                # 'temperature',
+                # 'supported_gpu_target_temp',
+                # 'power_readings',
+                # 'clocks',
+                'applications_clocks',
+                'default_applications_clocks',
+                'max_clocks',
+                'max_customer_boost_clocks',
+                'clock_policy',
+                # 'voltage',
+                'supported_clocks',
+                'processes'
+            ]:
                 try:
                     del result[gpu_instance][attribute]
                 except KeyError:
@@ -251,7 +229,7 @@ class Gpu:
             elif output == "yaml":
                 result = yaml.dump(xmltodict.parse(r))
         except Exception as e:
-            print (e)
+            print(e)
             result = None
         return result
 
@@ -263,7 +241,7 @@ class Gpu:
             repeated = int(repeated)
 
         try:
-            delay=float(delay)
+            delay = float(delay)
         except Exception as e:
             delay = 1.0
 
@@ -276,9 +254,16 @@ class Gpu:
             stream = open(logfile, "w")
 
         print("# ####################################################################################")
-        print ("# time, ", end = "")
+        print("# time, ", end="")
         for i in range(self.count):
-            print (f"{i} gpu_util %, {i} memory_util %, {i} encoder_util %, {i} decoder_util %, {i} gpu_temp C, {i} power_draw W", end="")
+            print(
+                f"{i} gpu_util %, "
+                f"{i} memory_util %, "
+                f"{i} encoder_util %, "
+                f"{i} decoder_util %, "
+                f"{i} gpu_temp C, "
+                f"{i} power_draw W",
+                end="")
         print()
 
         counter = repeated
@@ -315,10 +300,10 @@ class Gpu:
                 result = ", ".join(result)
                 if dense:
                     result = result.replace(" ", "")
-                print (result, file=stream)
+                print(result, file=stream)
 
             except Exception as e:
-                print (e)
+                print(e)
 
     def __str__(self):
         return pprint.pformat(self._smi, indent=2)
