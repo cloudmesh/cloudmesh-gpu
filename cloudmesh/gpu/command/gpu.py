@@ -22,8 +22,8 @@ class GpuCommand(PluginCommand):
         ::
 
           Usage:
-                gpu watch [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
-                gpu --json [--pretty] [FILE]
+                gpu watch [--gpu=GPU] [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
+                gpu --json [--gpu=GPU] [--pretty] [FILE]
                 gpu --xml
                 gpu --yaml
                 gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
@@ -67,14 +67,22 @@ class GpuCommand(PluginCommand):
 
 
         def _select(d, what):
-            result = []
-            counter = 0
-            for entry in d:
-                counter = counter + 1
-                if str(counter) in what:
-                    result.append(entry)
-            return result
-
+            try:
+                selected = []
+                data = dict(gpu.smi(output="json"))["nvidia_smi_log"]['gpu']
+                selection = [int(i) for i in what]
+                # selected = [data[i] for i in selection]
+                # this way we can pass numbers which do not exist
+                selected = []
+                for i in selection:
+                    try:
+                        selected.append(data[i])
+                    except:
+                        pass
+                d["nvidia_smi_log"]['gpu'] = selected
+            except Exception as e:
+                print(e)
+            return d
 
 
         try:
@@ -87,7 +95,8 @@ class GpuCommand(PluginCommand):
                 gpu.watch(logfile=arguments.logfile,
                           delay=arguments.delay,
                           repeated=int(arguments["--count"]),
-                          dense=arguments["--dense"])
+                          dense=arguments["--dense"],
+                          gpu=arguments.gpu)
 
                 return ""
 
@@ -111,10 +120,13 @@ class GpuCommand(PluginCommand):
             elif arguments.json and arguments.pertty:
                 filename = arguments.FILE
                 result = gpu.smi(output="json", filename=filename)
+                result = _select(result, arguments.gpu)
 
             elif arguments.json:
                 filename = arguments.FILE
                 result = gpu.smi(output="json", filename=filename)
+                result = _select(result, arguments.gpu)
+
 
             elif arguments.yaml:
                 result = gpu.smi(output="yaml")

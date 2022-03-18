@@ -27,7 +27,7 @@ class Gpu:
                 self._smi = [self._smi]
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
-
+        self.gpus = 0
 
     def exit_handler(self, signal_received, frame):
         """
@@ -47,11 +47,12 @@ class Gpu:
 
     @property
     def count(self):
-        try:
-            number = int(Shell.run("nvidia-smi --list-gpus | wc -l").strip())
-        except:
-            number = 0
-        return number
+        if self.gpus == 0:
+            try:
+                self.gpus = int(Shell.run("nvidia-smi --list-gpus | wc -l").strip())
+            except:
+                self.gpus = 0
+        return self.gpus
 
     def vendor(self):
         if os.name != "nt":
@@ -67,6 +68,26 @@ class Gpu:
             except Exception:
                 results = None
         return result
+
+        def select(self, d, what):
+            try:
+                selected = []
+                data = dict(gpu.smi(output="json"))["nvidia_smi_log"]['gpu']
+                selection = [int(i) for i in what]
+                # selected = [data[i] for i in selection]
+                # this way we can pass numbers which do not exist
+                selected = []
+                for i in selection:
+                    try:
+                        selected.append(data[i])
+                    except:
+                        pass
+                d["nvidia_smi_log"]['gpu'] = selected
+            except Exception as e:
+                print(e)
+            return d
+
+
 
     def processes(self):
         result = {}
@@ -234,7 +255,7 @@ class Gpu:
             result = None
         return result
 
-    def watch(self, logfile=None, delay=1.0, repeated=None, dense=False):
+    def watch(self, logfile=None, delay=1.0, repeated=None, dense=False, gpu=None):
 
         if repeated is None:
             repeated = -1
@@ -262,6 +283,10 @@ class Gpu:
 
         counter = repeated
 
+        if gpu is not None:
+            selected = [int(i) for i in gpu]
+        else:
+            selected = list(range(self.count))
         while self.running:
             try:
                 if counter > 0:
@@ -272,22 +297,20 @@ class Gpu:
                 data = self.smi(output="json")
 
                 result = [f"{today} {now}"]
-                for gpu in range(self.count):
-                    utilization = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["utilization"])
-                    temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
-                    power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["power_readings"])
 
-                    #
-                    # have alternative format without spaces
-                    #
-                    line = \
-                        f"{utilization.gpu_util[:-2]: >3}, " \
-                        f"{utilization.memory_util[:-2]: >3}, " \
-                        f"{utilization.encoder_util[:-2]: >3}, " \
-                        f"{utilization.decoder_util[:-2]: >3}, " \
-                        f"{temperature.gpu_temp[:-2]: >5}, " \
-                        f"{power.power_draw[:-2]: >8}"
-                    result.append(line)
+                for gpu in range(self.count):
+                    if gpu in selected:
+                        utilization = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["utilization"])
+                        temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
+                        power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["power_readings"])
+                        line = \
+                            f"{utilization.gpu_util[:-2]: >3}, " \
+                            f"{utilization.memory_util[:-2]: >3}, " \
+                            f"{utilization.encoder_util[:-2]: >3}, " \
+                            f"{utilization.decoder_util[:-2]: >3}, " \
+                            f"{temperature.gpu_temp[:-2]: >5}, " \
+                            f"{power.power_draw[:-2]: >8}"
+                        result.append(line)
 
                 result = ", ".join(result)
                 if dense:
