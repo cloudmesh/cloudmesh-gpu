@@ -257,6 +257,7 @@ class Gpu:
         print("# time, ", end="")
         for i in range(self.count):
             print(
+                f"{i} id, "
                 f"{i} gpu_util %, "
                 f"{i} memory_util %, "
                 f"{i} encoder_util %, "
@@ -289,6 +290,7 @@ class Gpu:
                         temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
                         power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["power_readings"])
                         line = \
+                            f"{gpu:>3}, " \
                             f"{utilization.gpu_util[:-2]: >3}, " \
                             f"{utilization.memory_util[:-2]: >3}, " \
                             f"{utilization.encoder_util[:-2]: >3}, " \
