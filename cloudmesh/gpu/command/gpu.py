@@ -31,7 +31,8 @@ class GpuCommand(PluginCommand):
                 gpu
 
           This command returns some information about NVIDIA GPUs if your
-          system has them.
+          system has them. Please use the cms command in the commandline with
+          `cms gpu`
 
           Options:
               --json              returns the information in json
@@ -76,8 +77,8 @@ class GpuCommand(PluginCommand):
                     one line.
 
                     # ####################################################################################
-                    # time, 0 id, 0 gpu_util %, 0 memory_util %, 0 encoder_util %, 0 decoder_util %, \
-                    #                                                          0 gpu_temp C, 0 power_draw W
+                    # time, 0 id, 0 gpu_util %, 0 memory_util %, 0 encoder_util %, 0 decoder_util %,
+                    # ... 0 gpu_temp C, 0 power_draw W
                     2022-03-18 11:26:40.877006,   0,  11,  16,   0,   0,    49,    47.47
                     2022-03-18 11:26:40.983229,   0,  17,  17,   0,   0,    49,    47.59
                     2022-03-18 11:26:41.093406,   0,  17,  17,   0,   0,    49,    47.88

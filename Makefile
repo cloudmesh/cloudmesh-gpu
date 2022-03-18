@@ -9,6 +9,19 @@ define banner
 	@echo "############################################################"
 endef
 
+readme:
+	@cms debug off
+	@rm -f README.md
+	@echo "# cms gpu command\n\n" >> README.md
+	@echo "Note: This file is automatically created. Please do not modify it." >> README.md
+	@echo "      Please change the code instead." >> README.md
+	@echo >> README.md
+	@echo \"\"\" >> README.md
+	cms help gpu | tail -n +6 >> README.md
+	@echo \"\"\" >> README.md
+
+	@cms debug on
+
 source:
 	$(call banner, "Install cloudmesh-common")
 	pip install -e . -U
