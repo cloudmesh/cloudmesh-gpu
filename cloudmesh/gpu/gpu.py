@@ -282,7 +282,7 @@ class Gpu:
                 now = datetime.now().time()  # time object
                 data = self.smi(output="json")
 
-                result = [f"{today} {now}"]
+                result = [f"{today}:{now}"]
 
                 for gpu in range(self.count):
                     if gpu in selected:
