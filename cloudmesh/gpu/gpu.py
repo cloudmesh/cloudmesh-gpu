@@ -16,8 +16,8 @@ from cloudmesh.common.util import readfile
 
 class Gpu:
 
-    def __init__(self):
-
+    def __init__(self, sep="T"):
+        self.sep =sep
         self.running = True
         try:
             self._smi = dict(self.smi(output="json"))['nvidia_smi_log']['gpu']
@@ -282,7 +282,7 @@ class Gpu:
                 now = datetime.now().time()  # time object
                 data = self.smi(output="json")
 
-                result = [f"{today}T{now}"]
+                result = [f"{today}{self.sep}{now}"]
 
                 for gpu in range(self.count):
                     if gpu in selected:
