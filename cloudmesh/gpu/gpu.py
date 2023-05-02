@@ -6,6 +6,7 @@ from datetime import date
 from datetime import datetime
 from signal import signal, SIGINT
 
+import matplotlib.pyplot as plt
 import xmltodict
 import yaml
 
@@ -26,6 +27,119 @@ class Gpu:
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
         self.gpus = 0
+
+    def fix_date_format(self, df, col):
+        import pandas as pd
+        # if We have T in it, we do not need to fix
+        for i, row in df.iterrows():
+            value = df.loc[i, col]
+            if "T" not in value:
+                new_date = df.loc[i, col].replace(":", " ", 1)
+                df.loc[i, col] = new_date
+        df[col] = pd.to_datetime(df[col])
+        return df
+
+    def read_eventlog(self, filename):
+        import csv
+        data = []
+        header = None
+        with open(filename, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=",")
+            data = list(reader)
+
+        header = data[1]
+        header[0] = "time"
+        data = data[2:]
+        return header, data
+
+
+    def read_energy(self, filename=None):
+
+        import pandas as pd
+        import io
+
+        location = Shell.map_filename(filename).path
+        # 1: means removing hashes
+        content = readfile(location).splitlines()[1:]
+        # removing #
+        content[0] = content[0][2:]
+        # print(content[0:10])
+        content = "\n".join(content)
+        content = content.replace(', ', ',')
+        df = pd.read_csv(io.StringIO(content), sep=',')
+
+        df = self.fix_date_format(df, "time")
+        df[["time"]] = df[["time"]].astype('datetime64[ns]')
+        return df
+
+
+
+    def export_figure(self, plt, x='Time/s', y='Energy/W',
+                      filename="energy"):
+        plt.xlabel(x)
+        plt.ylabel(y)
+        png = filename + ".png"
+        pdf = filename + ".pdf"
+        print ("Writing", png)
+        plt.savefig(png, bbox_inches='tight', dpi=600)
+        print ("Writing", pdf)
+        plt.savefig(pdf, bbox_inches='tight')
+
+    def graph(self, file, output):
+
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+        print ("HHH", file)
+
+        header, data = self.read_eventlog(file)
+        time = []
+        value = []
+        for entry in data:
+            time.append(entry[0])
+            value.append(entry[7])
+        print ("WWWW")
+
+        x_label="Time in s"
+        y_label="Power Draw in"
+
+        import pandas as pd
+
+        df = pd.DataFrame(
+            {
+                "time": time,
+                "energy": value
+            }
+        )
+
+        try:
+            ax = sns.lineplot(x=f"time", y="energy", data=df)
+
+
+            plt.ylabel(y_label)
+            plt.xlabel(x_label)
+        except Exception as e:
+            print (e)
+
+        self.export_figure(plt, filename="energy")
+
+        """
+        print ("OOOO")
+        output_format = output.basename(output).rsplit(".", 1)
+        print ("RRRR")
+        print (file)
+        print (output)
+        print (logfile)
+        """
+        if output_format in ["jpg", "png"]:
+            dpi = 300
+
+        else:
+
+            print ("hello")
+
+
+
 
     def exit_handler(self, signal_received, frame):
         """

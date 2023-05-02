@@ -28,6 +28,7 @@ class GpuCommand(PluginCommand):
                 gpu status
                 gpu count
                 gpu kill
+                gpu show --output=OUTPUT FILE
                 gpu
 
           This command returns some information about NVIDIA GPUs if your
@@ -237,6 +238,16 @@ class GpuCommand(PluginCommand):
                           gpu=arguments.gpu)
 
                 return ""
+
+            elif arguments.show:
+
+                file = arguments.FILE
+                output = arguments.output
+
+                print (file, output)
+                print ("AAA")
+                gpu.graph(file, output)
+                print("AAA")
 
             elif arguments.kill:
 
