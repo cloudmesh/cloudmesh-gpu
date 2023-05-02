@@ -85,13 +85,12 @@ class Gpu:
         print ("Writing", pdf)
         plt.savefig(pdf, bbox_inches='tight')
 
-    def graph(self, file, output):
 
+    def graph(self, file, output):
         import seaborn as sns
         import matplotlib.pyplot as plt
         from datetime import datetime
-
-        print ("HHH", file)
+        import pandas as pd
 
         header, data = self.read_eventlog(file)
         time = []
@@ -102,12 +101,8 @@ class Gpu:
 
             time.append(t)
             value.append(entry[7])
-        print ("WWWW")
-
-        x_label="Time in s"
-        y_label="Power Draw in"
-
-        import pandas as pd
+        x_label = "Time in s"
+        y_label = "Power Draw in W"
 
         df = pd.DataFrame(
             {
@@ -115,35 +110,28 @@ class Gpu:
                 "energy": value
             }
         )
-        # df = self.fix_date_format(df, 0)
+        df['elapsed'] = df['time'] - pd.to_datetime(df['time'].values[0])
 
-        try:
-            ax = sns.lineplot(x=f"time", y="energy", data=df)
+        df['elapsed_seconds'] = df.apply(
+            lambda row: row.elapsed / pd.Timedelta(seconds=1), axis=1)
+        df['energy'] = df.apply(lambda row: float(row.energy), axis=1)
+        ax = sns.lineplot(x=f"elapsed_seconds", y="energy", data=df)
+        # taking out extension from file
+        if '.' in file:
+            file = str(os.path.splitext(file)[0])
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        png = file + ".png"
+        pdf = file + ".pdf"
 
-
-            plt.ylabel(y_label)
-            plt.xlabel(x_label)
-        except Exception as e:
-            print (e)
-
-        self.export_figure(plt, filename="energy")
-
-        """
-        print ("OOOO")
-        output_format = output.basename(output).rsplit(".", 1)
-        print ("RRRR")
-        print (file)
-        print (output)
-        print (logfile)
-        """
-        if output_format in ["jpg", "png"]:
-            dpi = 300
-
+        if output in ["jpg", "png"]:
+            written_output = output
+            plt.savefig(png, bbox_inches='tight', dpi=600)
         else:
+            written_output = 'pdf'
+            plt.savefig(pdf, bbox_inches='tight')
 
-            print ("hello")
-
-
+        return f'Written to {file + "." + written_output}'
 
 
     def exit_handler(self, signal_received, frame):

@@ -244,10 +244,7 @@ class GpuCommand(PluginCommand):
                 file = arguments.FILE
                 output = arguments.output
 
-                print (file, output)
-                print ("AAA")
-                gpu.graph(file, output)
-                print("AAA")
+                result = gpu.graph(file, output)
 
             elif arguments.kill:
 
@@ -266,7 +263,7 @@ class GpuCommand(PluginCommand):
                     Console.error("nvidia-smi must be installed on the system")
                     return ""
 
-            elif arguments.json and arguments.pertty:
+            elif arguments.json and arguments.pretty:
                 filename = arguments.FILE
                 result = gpu.smi(output="json", filename=filename)
                 result = _select(result, arguments.gpu)
