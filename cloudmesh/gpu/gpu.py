@@ -89,6 +89,7 @@ class Gpu:
 
         import seaborn as sns
         import matplotlib.pyplot as plt
+        from datetime import datetime
 
         print ("HHH", file)
 
@@ -96,7 +97,10 @@ class Gpu:
         time = []
         value = []
         for entry in data:
-            time.append(entry[0])
+            t = entry[0]
+            t = datetime.strptime(t, '%Y-%m-%dT%H:%M:%S.%f')
+
+            time.append(t)
             value.append(entry[7])
         print ("WWWW")
 
@@ -111,6 +115,7 @@ class Gpu:
                 "energy": value
             }
         )
+        # df = self.fix_date_format(df, 0)
 
         try:
             ax = sns.lineplot(x=f"time", y="energy", data=df)
