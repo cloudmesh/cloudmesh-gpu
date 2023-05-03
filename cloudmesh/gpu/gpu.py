@@ -13,7 +13,10 @@ import yaml
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.dotdict import dotdict
 from cloudmesh.common.util import readfile
+from cloudmesh.common.util import banner
 
+from tabulate import tabulate
+from cloudmesh.common.util import csv_to_list
 
 class Gpu:
 
@@ -27,6 +30,67 @@ class Gpu:
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
         self.gpus = 0
+
+    def probe(self):
+        banner("Cloudmesh GPU Probe", c="=")
+
+        for label, command in [
+             ("nvidia-smi", "nvidia-smi"),
+        ]:
+            try:
+                banner(label)
+                r = Shell.run(command)
+                print (r)
+            except:
+                pass
+
+        for label, command in [
+            ("OS Info", "cat /etc/*release"),
+        ]:
+            try:
+                banner(label)
+                r = Shell.run(command)
+                r = r.replace("=", ",")
+                data = csv_to_list(r)
+                print(tabulate(data, tablefmt='fancy_grid'))
+            except:
+                pass
+
+        for label, command in [
+            ("drivers list", "xxx ubuntu-drivers list")
+        ]:
+            try:
+                banner(label)
+                r = Shell.run(command)
+                r = r.replace("kernel modules provided by", "")\
+                    .replace("(","")\
+                    .replace(")", "")\
+                    .replace(" ", "")
+                data = csv_to_list(r)
+                print(tabulate(data,tablefmt='fancy_grid'))
+            except:
+                pass
+
+        for label, command in [
+             ("Nvidia Drivers","apt search nvidia-driver"),
+        ]:
+            try:
+                banner(label)
+                lines = Shell.run(command)\
+                    .replace("\n  ", ";").splitlines()
+                lines = [line.replace(" ", ";", 3) for line in lines]
+                lines = "\n".join(lines).replace("\n\n", "\n")
+                lines =  "\n".join(Shell.find_lines_from(lines, "nvidia"))
+
+                data = csv_to_list(lines, sep=";")
+                print(tabulate(data,tablefmt='fancy_grid'))
+            except:
+                pass
+
+
+
+        return ""
+
 
     def fix_date_format(self, df, col):
         import pandas as pd

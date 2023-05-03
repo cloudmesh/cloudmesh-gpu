@@ -29,6 +29,7 @@ class GpuCommand(PluginCommand):
                 gpu count
                 gpu kill
                 gpu show --output=OUTPUT FILE
+                gpu probe
                 gpu
 
           This command returns some information about NVIDIA GPUs if your
@@ -237,6 +238,11 @@ class GpuCommand(PluginCommand):
                           dense=arguments["--dense"],
                           gpu=arguments.gpu)
 
+                return ""
+
+            elif arguments.probe:
+
+                gpu.probe()
                 return ""
 
             elif arguments.show:
