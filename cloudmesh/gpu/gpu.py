@@ -150,7 +150,7 @@ class Gpu:
         plt.savefig(pdf, bbox_inches='tight')
 
 
-    def graph(self, file, output, plot_type):
+    def graph(self, file, output, plot_type, histogram_frequency):
         import seaborn as sns
         import matplotlib.pyplot as plt
         from datetime import datetime
@@ -181,7 +181,16 @@ class Gpu:
         df['energy'] = df.apply(lambda row: float(row.energy), axis=1)
 
         if plot_type == 'histogram':
-            df.hist(column='energy')
+
+            if histogram_frequency == 'percent':
+
+                import numpy as np
+
+                df["energy"].plot.hist(weights = np.ones_like(df.index) / len(df.index))
+                plt.grid(True)
+
+            else:
+                df.hist(column='energy')
             plt.title('')
             x_label = 'Power Draw in W'
             y_label = 'Frequency'
@@ -190,21 +199,30 @@ class Gpu:
 
         plt.xlabel(x_label)
         plt.ylabel(y_label)
+
         # taking out extension from file
-        if '.' in file:
-            file = str(os.path.splitext(file)[0])
-
-        png = file + ".png"
-        pdf = file + ".pdf"
-
-        if output in ["jpg", "png"]:
-            written_output = output
-            plt.savefig(png, bbox_inches='tight', dpi=600)
+        # first we determine if there is extension.
+        if '.' in output:
+            extension = str(os.path.splitext(output)[1])
+            name_of_output = output
+        # if there is none then we decide that the output is the extension.
         else:
-            written_output = 'pdf'
-            plt.savefig(pdf, bbox_inches='tight')
+            extension = '.' + output
+            file = str(os.path.splitext(file)[0])
+            name_of_output = file + extension
 
-        return f'Written to {file + "." + written_output}'
+        # png = file + ".png"
+        # pdf = file + ".pdf"
+
+
+        if extension.lower() in [".jpg", ".png"]:
+            # written_output = output
+            plt.savefig(name_of_output, bbox_inches='tight', dpi=600)
+        else:
+            # written_output = 'pdf'
+            plt.savefig(name_of_output, bbox_inches='tight')
+
+        return f'Written to {name_of_output}'
 
 
     def exit_handler(self, signal_received, frame):
