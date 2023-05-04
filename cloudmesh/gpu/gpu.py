@@ -150,7 +150,7 @@ class Gpu:
         plt.savefig(pdf, bbox_inches='tight')
 
 
-    def graph(self, file, output):
+    def graph(self, file, output, plot_type):
         import seaborn as sns
         import matplotlib.pyplot as plt
         from datetime import datetime
@@ -179,12 +179,21 @@ class Gpu:
         df['elapsed_seconds'] = df.apply(
             lambda row: row.elapsed / pd.Timedelta(seconds=1), axis=1)
         df['energy'] = df.apply(lambda row: float(row.energy), axis=1)
-        ax = sns.lineplot(x=f"elapsed_seconds", y="energy", data=df)
+
+        if plot_type == 'histogram':
+            df.hist(column='energy')
+            plt.title('')
+            x_label = 'Power Draw in W'
+            y_label = 'Frequency'
+        else:
+            ax = sns.lineplot(x=f"elapsed_seconds", y="energy", data=df)
+
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
         # taking out extension from file
         if '.' in file:
             file = str(os.path.splitext(file)[0])
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
+
         png = file + ".png"
         pdf = file + ".pdf"
 

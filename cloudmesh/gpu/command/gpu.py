@@ -28,7 +28,7 @@ class GpuCommand(PluginCommand):
                 gpu status
                 gpu count
                 gpu kill
-                gpu show --output=OUTPUT FILE
+                gpu show --output=OUTPUT FILE [--plot=PLOT]
                 gpu probe
                 gpu
 
@@ -45,6 +45,7 @@ class GpuCommand(PluginCommand):
               --dense             do not print any spaces [default: False]
               --detail            short process names [default: False]
               --format=FORMAT     table, json, yaml [default: table]
+              --plot=PLOT         timeseries, histogram [default: timeseries]
               --gpu=GPUS
 
           Description:
@@ -201,7 +202,8 @@ class GpuCommand(PluginCommand):
                        "logfile",
                        "table",
                        "detail",
-                       "output"
+                       "output",
+                       "plot"
                        )
         arguments.format = arguments["--format"]
         arguments.gpu = Parameter.expand(arguments["--gpu"])
@@ -248,9 +250,10 @@ class GpuCommand(PluginCommand):
             elif arguments.show:
 
                 file = arguments.FILE
-                output = arguments.output
+                output = arguments.output.lower()
+                plot_type = arguments.plot
 
-                result = gpu.graph(file, output)
+                result = gpu.graph(file, output, plot_type)
 
             elif arguments.kill:
 
