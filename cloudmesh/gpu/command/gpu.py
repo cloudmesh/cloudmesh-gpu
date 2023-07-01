@@ -28,7 +28,7 @@ class GpuCommand(PluginCommand):
                 gpu status
                 gpu count
                 gpu kill
-                gpu show --output=OUTPUT FILE
+                gpu show --output=OUTPUT FILE [--plot=PLOT] [--frequency=FREQUENCY]
                 gpu probe
                 gpu
 
@@ -37,22 +37,24 @@ class GpuCommand(PluginCommand):
           `cms gpu`
 
           Options:
-              --json              returns the information in json
-              --xml               returns the information in xml
-              --yaml              returns the information in xml
-              --logfile=LOGFILE   the logfile
-              --count=COUNT       how many times the watch is run [default: -1]
-              --dense             do not print any spaces [default: False]
-              --detail            short process names [default: False]
-              --format=FORMAT     table, json, yaml [default: table]
-              --gpu=GPUS
+              --json                 returns the information in json
+              --xml                  returns the information in xml
+              --yaml                 returns the information in xml
+              --logfile=LOGFILE      the logfile
+              --count=COUNT          how many times the watch is run [default: -1]
+              --dense                do not print any spaces [default: False]
+              --detail               short process names [default: False]
+              --format=FORMAT        table, json, yaml [default: table]
+              --plot=PLOT            timeseries, histogram [default: timeseries]
+              --frequency=FREQUENCY  absolute, percent [default: percent]
+              --gpu=GPUS             which graphics cards
 
           Description:
 
             Although some GPU information tools exist, we did not find all information
-            that we needed. Also the output format was not convenient enough for later
+            that we needed. Also, the output format was not convenient enough for later
             analysis. The program we developed can obtain information at specified
-            intervals. Note that at this time the tool is restricted to NVIDIA GPU's.
+            intervals. Note that at this time the tool is restricted to NVIDIA GPUs.
 
                 cms gpu kill
                     In case you run the gpu command in the background you can kill it with the
@@ -62,13 +64,13 @@ class GpuCommand(PluginCommand):
                     Returns the number of GPUS.
 
                 gpu watch [--gpu=GPU] [--delay=SECONDS] [--logfile=LOGFILE] [--count=COUNT] [--dense]
-                    This command allows to print environmental variables in a continious fashion.
-                    If count is used the command is executed that number of times. If it is ommitted
+                    This command allows to print environmental variables in a continuous fashion.
+                    If count is used the command is executed that number of times. If it is omitted
                     it runs continiously. The delay specifies how many seconds between invocations are
                     dealyed. The `logfile` specifies an output file in which the events are written.
                     By default spaces are included so the output has a table like format. The spaces
                     can be eliminated with dense so that less space is used in the log file.
-                    In case multiple GPUs are present one can select specific GPUs fr which the
+                    In case multiple GPUs are present one can select specific GPUs for which the
                     monitoring entries are generated.
                     The watch command output is proceeded by a header that is adapted based on the
                     gpus specified. This makes it possible to read in the file as dataframe and apply
@@ -89,7 +91,7 @@ class GpuCommand(PluginCommand):
                     Prints out the information in json format. We have eliminated some of the attributes
                     that are not important to us at this time. with the `pretty` flag the json is printed
                     in indented pretty format.
-                    The FILE parameter is used to read in a saved instance from nvidid-smi.
+                    The FILE parameter is used to read in a saved instance from nvidia-smi.
 
                 gpu --xml
                     Prints out the information in xml format. This is the format that is retrieved from
@@ -201,7 +203,9 @@ class GpuCommand(PluginCommand):
                        "logfile",
                        "table",
                        "detail",
-                       "output"
+                       "output",
+                       "plot",
+                       "frequency"
                        )
         arguments.format = arguments["--format"]
         arguments.gpu = Parameter.expand(arguments["--gpu"])
@@ -248,9 +252,11 @@ class GpuCommand(PluginCommand):
             elif arguments.show:
 
                 file = arguments.FILE
-                output = arguments.output
+                output = arguments.output.lower()
+                plot_type = arguments.plot
+                frequency_type = arguments.frequency
 
-                result = gpu.graph(file, output)
+                result = gpu.graph(file, output, plot_type, frequency_type)
 
             elif arguments.kill:
 
