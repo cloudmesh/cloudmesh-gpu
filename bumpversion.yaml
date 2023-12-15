@@ -1,0 +1,4 @@
+bumpversion:
+- cloudmesh/gpu/__version__.py
+- cloudmesh/gpu/__init__.py
+- VERSION

@@ -15,7 +15,7 @@
 # limitations under the License.                                          #
 # ------------------------------------------------------------------------#
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, find_namespace_packages, setup
 import io
 
 def readfile(filename):
@@ -61,7 +61,13 @@ setup(
     version=version,
     license="Apache 2.0",
     url=URL,
-    packages=find_packages(),
+    packages=find_namespace_packages(
+        exclude=("tests",
+                 "deprecated",
+                 "propose",
+                 "examples",
+                 "conda"),
+        include=['cloudmesh']),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
@@ -70,9 +76,7 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.12",
     ],
     install_requires=requiers,
     tests_require=[
@@ -80,5 +84,4 @@ setup(
         "coverage",
     ],
     zip_safe=False,
-    namespace_packages=['cloudmesh'],
 )
