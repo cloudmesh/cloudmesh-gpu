@@ -29,9 +29,16 @@ def readfile(filename):
 #
 requiers = """
 cloudmesh-cmd5
+cloudmesh-common
 cloudmesh-sys
 cloudmesh-inventory
 cloudmesh-configuration
+colorama
+humanize
+oyaml
+pandas
+seaborn
+matplotlib
 xmltodict
 """.split("\n")
 
