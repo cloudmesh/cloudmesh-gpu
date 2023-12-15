@@ -68,6 +68,7 @@ setup(
                  "examples",
                  "conda"),
         include=['cloudmesh']),
+    package_dir={"cloudmesh": "cloudmesh"},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
