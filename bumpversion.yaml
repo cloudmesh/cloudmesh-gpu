@@ -1,4 +1,5 @@
 bumpversion:
-- cloudmesh/gpu/__version__.py
-- cloudmesh/gpu/__init__.py
+- src/cloudmesh/gpu/__init__.py
+- src/cloudmesh/gpu/__version__.py
+- pyproject.toml
 - VERSION
