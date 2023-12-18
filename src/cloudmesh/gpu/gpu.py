@@ -1,3 +1,44 @@
+"""
+Gpu Class Module
+
+This module defines the `Gpu` class, providing functionality to probe, monitor, and analyze GPU information
+using nvidia-smi. It includes methods for probing GPU details, reading event logs, analyzing energy data,
+generating graphs, and continuous monitoring of GPU status.
+
+Attributes:
+    N/A
+
+Methods:
+    - probe(): Probe GPU information and display relevant details.
+    - fix_date_format(df, col): Fix date format in the given DataFrame column.
+    - read_eventlog(filename): Read GPU event log from the specified file.
+    - read_energy(filename=None): Read GPU energy data from the specified file.
+    - export_figure(plt, x='Time/s', y='Energy/W', filename="energy"): Export a matplotlib figure to a file.
+    - graph(file, output, plot_type, histogram_frequency): Generate and display a graph based on GPU event log data.
+    - exit_handler(signal_received, frame): Handle the exit when SIGINT or CTRL-C is detected.
+    - count(): Get the count of available GPUs.
+    - vendor(): Get GPU vendor information.
+    - processes(): Get information about GPU processes.
+    - system(): Get general information about the GPU system.
+    - status(): Get detailed status information about the GPU.
+    - smi(output=None, filename=None): Run nvidia-smi command and parse the output.
+    - watch(logfile=None, delay=1.0, repeated=None, dense=False, gpu=None): Continuously monitor GPU status and log the information.
+    - __str__(): Return a string representation of the Gpu object.
+
+Usage:
+    from gpu_module import Gpu
+
+    # Create a Gpu instance
+    gpu_instance = Gpu()
+
+    # Probe GPU information
+    gpu_instance.probe()
+
+    # Monitor GPU status continuously
+    gpu_instance.watch()
+
+"""
+
 import os
 # from cloudmesh.common.Printer import Printer
 import pprint
@@ -19,8 +60,39 @@ from tabulate import tabulate
 from cloudmesh.common.util import csv_to_list
 
 class Gpu:
+    """
+      The `Gpu` class provides functionality to probe, monitor, and analyze GPU information using nvidia-smi.
+
+      Attributes:
+          sep (str): Separator for date and time. Default is "T".
+          running (bool): Flag indicating whether GPU monitoring is active.
+          _smi (list): List containing GPU information from nvidia-smi.
+
+      Methods:
+          - probe(): Probe GPU information and display relevant details.
+          - fix_date_format(df, col): Fix date format in the given DataFrame column.
+          - read_eventlog(filename): Read GPU event log from the specified file.
+          - read_energy(filename=None): Read GPU energy data from the specified file.
+          - export_figure(plt, x='Time/s', y='Energy/W', filename="energy"): Export a matplotlib figure to a file.
+          - graph(file, output, plot_type, histogram_frequency): Generate and display a graph based on GPU event log data.
+          - exit_handler(signal_received, frame): Handle the exit when SIGINT or CTRL-C is detected.
+          - count(): Get the count of available GPUs.
+          - vendor(): Get GPU vendor information.
+          - processes(): Get information about GPU processes.
+          - system(): Get general information about the GPU system.
+          - status(): Get detailed status information about the GPU.
+          - smi(output=None, filename=None): Run nvidia-smi command and parse the output.
+          - watch(logfile=None, delay=1.0, repeated=None, dense=False, gpu=None): Continuously monitor GPU status and log the information.
+          - __str__(): Return a string representation of the Gpu object.
+      """
 
     def __init__(self, sep="T"):
+        """
+        Initialize the Gpu class.
+
+        Args:
+            sep (str): Separator for date and time. Default is "T".
+        """
         self.sep =sep
         self.running = True
         try:
@@ -32,6 +104,12 @@ class Gpu:
         self.gpus = 0
 
     def probe(self):
+        """
+        Probe GPU information and display relevant details.
+
+        Returns:
+            str: Empty string.
+        """
         banner("Cloudmesh GPU Probe", c="=")
 
         for label, command in [
@@ -93,6 +171,16 @@ class Gpu:
 
 
     def fix_date_format(self, df, col):
+        """
+        Fix date format in the given DataFrame column.
+
+        Args:
+            df (pandas.DataFrame): DataFrame containing the data.
+            col (str): Column name with date values.
+
+        Returns:
+            pandas.DataFrame: DataFrame with fixed date format.
+        """
         import pandas as pd
         # if We have T in it, we do not need to fix
         for i, row in df.iterrows():
@@ -104,6 +192,16 @@ class Gpu:
         return df
 
     def read_eventlog(self, filename):
+        """
+        Read GPU event log from the specified file.
+
+        Args:
+            filename (str): Path to the event log file.
+
+        Returns:
+            tuple: Header and data from the event log.
+        """
+
         import csv
         data = []
         header = None
@@ -118,7 +216,15 @@ class Gpu:
 
 
     def read_energy(self, filename=None):
+        """
+        Read GPU energy data from the specified file.
 
+        Args:
+            filename (str): Path to the energy data file.
+
+        Returns:
+            pandas.DataFrame: DataFrame containing the energy data.
+        """
         import pandas as pd
         import io
 
@@ -140,6 +246,18 @@ class Gpu:
 
     def export_figure(self, plt, x='Time/s', y='Energy/W',
                       filename="energy"):
+        """
+        Export a matplotlib figure to a file.
+
+        Args:
+            plt (matplotlib.pyplot): Matplotlib pyplot instance.
+            x (str): X-axis label. Default is 'Time/s'.
+            y (str): Y-axis label. Default is 'Energy/W'.
+            filename (str): Base filename for the exported figure.
+
+        Returns:
+            None
+        """
         plt.xlabel(x)
         plt.ylabel(y)
         png = filename + ".png"
@@ -151,6 +269,18 @@ class Gpu:
 
 
     def graph(self, file, output, plot_type, histogram_frequency):
+        """
+        Generate and display a graph based on GPU event log data.
+
+        Args:
+            file (str): Path to the GPU event log file.
+            output (str): Output file format (e.g., 'pdf', 'png').
+            plot_type (str): Type of plot ('line' or 'histogram').
+            histogram_frequency (str): Frequency for histogram ('percent' or 'count').
+
+        Returns:
+            str: Information about the written output file.
+        """
         import seaborn as sns
         import matplotlib.pyplot as plt
         from datetime import datetime
@@ -227,15 +357,14 @@ class Gpu:
 
     def exit_handler(self, signal_received, frame):
         """
-        Kube manager has a build in Benchmark framework. In case you
-        press CTRL-C, this handler assures that the benchmarks will be printed.
+        Handle the exit when SIGINT or CTRL-C is detected.
 
-        :param signal_received:
-        :type signal_received:
-        :param frame:
-        :type frame:
-        :return:
-        :rtype:
+        Args:
+            signal_received: The received signal.
+            frame: The frame.
+
+        Returns:
+            None
         """
         # Handle any cleanup here
         print('SIGINT or CTRL-C detected. Exiting gracefully')
@@ -243,6 +372,12 @@ class Gpu:
 
     @property
     def count(self):
+        """
+        Get the count of available GPUs.
+
+        Returns:
+            int: Count of available GPUs.
+        """
         if self.gpus == 0:
             try:
                 self.gpus = int(Shell.run("nvidia-smi --list-gpus | wc -l").strip())
@@ -251,6 +386,12 @@ class Gpu:
         return self.gpus
 
     def vendor(self):
+        """
+        Get GPU vendor information.
+
+        Returns:
+            str or list: GPU vendor information.
+        """
         if os.name != "nt":
             try:
                 r = Shell.run("lspci -vnn | grep VGA -A 12 | fgrep Subsystem:").strip()
@@ -266,6 +407,12 @@ class Gpu:
         return result
 
     def processes(self):
+        """
+        Get information about GPU processes.
+
+        Returns:
+            dict: GPU process information.
+        """
         result = {}
         try:
             # We want to call this each time, as we want the current processes
@@ -278,6 +425,12 @@ class Gpu:
         return result
 
     def system(self):
+        """
+         Get general information about the GPU system.
+
+         Returns:
+             dict: General GPU system information.
+         """
         result = self._smi
         for gpu_instance in range(len(self._smi)):
             for attribute in [
@@ -341,6 +494,12 @@ class Gpu:
         return result
 
     def status(self):
+        """
+        Get detailed status information about the GPU.
+
+        Returns:
+            dict: Detailed GPU status information.
+        """
         result = self._smi
         for gpu_instance in range(len(self._smi)):
             for attribute in [
@@ -403,6 +562,16 @@ class Gpu:
         return result
 
     def smi(self, output=None, filename=None):
+        """
+         Run nvidia-smi command and parse the output.
+
+         Args:
+             output (str): Output format ('text', 'json', 'yaml').
+             filename (str): Path to a file containing nvidia-smi output.
+
+         Returns:
+             dict or str: Parsed nvidia-smi output.
+         """
         # None = text
         # json
         # yaml
@@ -432,6 +601,19 @@ class Gpu:
         return result
 
     def watch(self, logfile=None, delay=1.0, repeated=None, dense=False, gpu=None):
+        """
+         Continuously monitor GPU status and log the information.
+
+         Args:
+             logfile (str): Path to the log file.
+             delay (float): Delay between each monitoring iteration.
+             repeated (int): Number of repetitions (-1 for continuous monitoring).
+             dense (bool): Whether to log data in dense format.
+             gpu (list): List of GPU indices to monitor.
+
+         Returns:
+             None
+         """
 
         if repeated is None:
             repeated = -1
@@ -506,4 +688,11 @@ class Gpu:
                 print(e)
 
     def __str__(self):
+        """
+        Return a string representation of the Gpu object.
+
+        Returns:
+            str: String representation of the Gpu object.
+        """
+
         return pprint.pformat(self._smi, indent=2)
