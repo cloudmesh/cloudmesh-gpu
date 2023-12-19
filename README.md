@@ -1,4 +1,20 @@
-# cms gpu command
+Cloudmesh Command gpu
+=====================
+
+[![GitHub Repo](https://img.shields.io/badge/github-repo-green.svg)](https://github.com/cloudmesh/cloudmesh-gpu)
+[![image](https://img.shields.io/pypi/pyversions/cloudmesh-gpu.svg)](https://pypi.org/project/cloudmesh-gpu)
+[![image](https://img.shields.io/pypi/v/cloudmesh-gpu.svg)](https://pypi.org/project/cloudmesh-gpu/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+[![General badge](https://img.shields.io/badge/Status-Production-<COLOR>.svg)](https://shields.io/)
+[![GitHub issues](https://img.shields.io/github/issues/cloudmesh/cloudmesh-gpu.svg)](https://github.com/cloudmesh/cloudmesh-gpu/issues)
+[![Contributors](https://img.shields.io/github/contributors/cloudmesh/cloudmesh-gpu.svg)](https://github.com/cloudmesh/cloudmesh-gpu/graphs/contributors)
+[![General badge](https://img.shields.io/badge/Other-repos-<COLOR>.svg)](https://github.com/cloudmesh/cloudmesh)
+
+
+[![Linux](https://img.shields.io/badge/OS-Linux-orange.svg)](https://www.linux.org/)
+[![macOS](https://img.shields.io/badge/OS-macOS-lightgrey.svg)](https://www.apple.com/macos)
+[![Windows](https://img.shields.io/badge/OS-Windows-blue.svg)](https://www.microsoft.com/windows)
 
 
 Note: This file is automatically created. Please do not modify it.
