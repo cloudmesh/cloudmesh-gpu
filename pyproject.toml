@@ -55,8 +55,13 @@ dependencies = [
     "matplotlib",
     "xmltodict"
 ]
+
 [project.urls]
-"Documentation" = "https://github.com/cloudmesh/cloudmesh-common"
+Homepage = "https://github.com/cloudmesh/cloudmesh-bar"
+Documentation = "https://github.com/cloudmesh/cloudmesh-bar/blob/main/README.md"
+Repository = "https://github.com/cloudmesh/cloudmesh-bar.git"
+Issues = "https://github.com/cloudmesh/cloudmesh-bar/issues"
+Changelog = "https://github.com/cloudmesh/cloudmesh-bar/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src/"]
