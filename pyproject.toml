@@ -64,5 +64,5 @@ Issues = "https://github.com/cloudmesh/cloudmesh-bar/issues"
 Changelog = "https://github.com/cloudmesh/cloudmesh-bar/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
-where = ["src/"]
+where = ["src"]
 include = ["cloudmesh.gpu", "cloudmesh.gpu.*"]
