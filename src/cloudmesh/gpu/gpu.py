@@ -424,6 +424,25 @@ class Gpu:
             print(e)
         return result
 
+    def print_attr(self, gpu=0, detail=False):
+        from pprint import pprint
+        banner("GPU Attributes")
+        data = self._smi
+
+        def print_keys(data, indent=0):
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    print(" " * indent + str(key))
+                    print_keys(value, indent + 4)
+                else:
+                    if detail:
+                        print(" " * indent + str(key) + ": " + str(value))
+                    else:
+                        print(" " * indent + str(key))
+
+        print_keys(data[gpu], indent=4)
+        return None
+
     def system(self):
         """
          Get general information about the GPU system.

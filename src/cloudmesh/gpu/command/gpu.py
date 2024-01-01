@@ -30,6 +30,7 @@ class GpuCommand(PluginCommand):
                 gpu kill
                 gpu show --output=OUTPUT FILE [--plot=PLOT] [--frequency=FREQUENCY]
                 gpu probe
+                gpu attr [--gpu=GPU] [--detail]
                 gpu
 
           This command returns some information about NVIDIA GPUs if your
@@ -102,6 +103,9 @@ class GpuCommand(PluginCommand):
                 gpu --yaml
                     Prints out the information in yaml format. The gpu selection flag is not enabled
                     for this format. If you want to implement it, create a pull request.
+
+                gpu attr [--gpu=GPU] [--detail]
+                    Prints out the attributes of the GPU in the specified format for the selected GPUs.
 
                 gpu ps [--gpu=GPU] [--format=FORMAT] [--detail]
                     Prints out the processes running on the GPU in the specified format for the selected GPUs.
@@ -311,6 +315,22 @@ class GpuCommand(PluginCommand):
                                         order=["job", "gpu", "pid", "type", "used_memory", "compute_instance_id",
                                                "gpu_instance_id", "process_name"]))
                 return ""
+
+            elif arguments.attr:
+                try:
+                    arguments.pretty = True
+                    try:
+                        number = int(arguments.gpu[0])
+                    except:
+                        number = 0
+                
+                    detail = arguments.detail
+                    print (number)
+                    print (detail)
+                    result = gpu.print_attr(gpu=number, detail=detail)
+                    # result  = _select(result, arguments.gpu)
+                except Exception as e:  
+                    print (e)
 
             elif arguments.system:
                 arguments.pretty = True
