@@ -8,7 +8,7 @@ requires = [
 
 [project]
 name = "cloudmesh-gpu"
-version = "5.0.2"
+version = "5.0.3"
 description = "A cloudmesh command called gpu that can be used to monitor the GPU during runtime"
 readme = "README.md"
 requires-python = ">=3.8"
