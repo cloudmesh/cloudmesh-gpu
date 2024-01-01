@@ -27,7 +27,7 @@ Note: This file is automatically created. Please do not modify it.
         gpu --json [--gpu=GPU] [--pretty] [FILE]
         gpu --xml
         gpu --yaml
-        gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
+        gpu ps [--gpu=GPU] [--format=FORMAT] [--detail]
         gpu system
         gpu status
         gpu count
@@ -106,7 +106,7 @@ Note: This file is automatically created. Please do not modify it.
             Prints out the information in yaml format. The gpu selection flag is not enabled
             for this format. If you want to implement it, create a pull request.
 
-        gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
+        gpu ps [--gpu=GPU] [--format=FORMAT] [--detail]
             Prints out the processes running on the GPU in the specified format for the selected GPUs.
             The process name is shortened based on removing the path of the command. If the full path
             is needed one can use the `detail` flag. Allowed formats are table, csv, json, and yaml.

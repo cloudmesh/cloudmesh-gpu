@@ -23,7 +23,7 @@ class GpuCommand(PluginCommand):
                 gpu --json [--gpu=GPU] [--pretty] [FILE]
                 gpu --xml
                 gpu --yaml
-                gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
+                gpu ps [--gpu=GPU] [--format=FORMAT] [--detail]
                 gpu system
                 gpu status
                 gpu count
@@ -48,6 +48,7 @@ class GpuCommand(PluginCommand):
               --plot=PLOT            timeseries, histogram [default: timeseries]
               --frequency=FREQUENCY  absolute, percent [default: percent]
               --gpu=GPUS             which graphics cards
+              --values               prints also values
 
           Description:
 
@@ -102,7 +103,7 @@ class GpuCommand(PluginCommand):
                     Prints out the information in yaml format. The gpu selection flag is not enabled
                     for this format. If you want to implement it, create a pull request.
 
-                gpu processes [--gpu=GPU] [--format=FORMAT] [--detail]
+                gpu ps [--gpu=GPU] [--format=FORMAT] [--detail]
                     Prints out the processes running on the GPU in the specified format for the selected GPUs.
                     The process name is shortened based on removing the path of the command. If the full path
                     is needed one can use the `detail` flag. Allowed formats are table, csv, json, and yaml.
@@ -188,9 +189,6 @@ class GpuCommand(PluginCommand):
                             },
                             "accounted_processes": null
                           }
-                        ]
-
-
 
         """
 
@@ -288,10 +286,10 @@ class GpuCommand(PluginCommand):
             elif arguments.yaml:
                 result = gpu.smi(output="yaml")
 
-            elif arguments.processes:
+            elif arguments.ps:
 
                 arguments.pretty = True
-                result = gpu.processes()
+                result = gpu.ps()
                 d = []
                 counter = 0
                 for i in result.keys():

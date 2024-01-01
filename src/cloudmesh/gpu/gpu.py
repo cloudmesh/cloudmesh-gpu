@@ -18,7 +18,7 @@ Methods:
     - exit_handler(signal_received, frame): Handle the exit when SIGINT or CTRL-C is detected.
     - count(): Get the count of available GPUs.
     - vendor(): Get GPU vendor information.
-    - processes(): Get information about GPU processes.
+    - ps(): Get information about GPU processes.
     - system(): Get general information about the GPU system.
     - status(): Get detailed status information about the GPU.
     - smi(output=None, filename=None): Run nvidia-smi command and parse the output.
@@ -78,7 +78,7 @@ class Gpu:
           - exit_handler(signal_received, frame): Handle the exit when SIGINT or CTRL-C is detected.
           - count(): Get the count of available GPUs.
           - vendor(): Get GPU vendor information.
-          - processes(): Get information about GPU processes.
+          - ps(): Get information about GPU processes.
           - system(): Get general information about the GPU system.
           - status(): Get detailed status information about the GPU.
           - smi(output=None, filename=None): Run nvidia-smi command and parse the output.
@@ -406,7 +406,7 @@ class Gpu:
                 results = None
         return result
 
-    def processes(self):
+    def ps(self):
         """
         Get information about GPU processes.
 
