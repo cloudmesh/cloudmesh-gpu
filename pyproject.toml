@@ -8,7 +8,7 @@ requires = [
 
 [project]
 name = "cloudmesh-gpu"
-version = "5.0.17"
+version = "5.0.2"
 description = "A cloudmesh command called gpu that can be used to monitor the GPU during runtime"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -55,9 +55,14 @@ dependencies = [
     "matplotlib",
     "xmltodict"
 ]
+
 [project.urls]
-"Documentation" = "https://github.com/cloudmesh/cloudmesh-common"
+Homepage = "https://github.com/cloudmesh/cloudmesh-bar"
+Documentation = "https://github.com/cloudmesh/cloudmesh-bar/blob/main/README.md"
+Repository = "https://github.com/cloudmesh/cloudmesh-bar.git"
+Issues = "https://github.com/cloudmesh/cloudmesh-bar/issues"
+Changelog = "https://github.com/cloudmesh/cloudmesh-bar/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
-where = ["src/"]
+where = ["src"]
 include = ["cloudmesh.gpu", "cloudmesh.gpu.*"]
