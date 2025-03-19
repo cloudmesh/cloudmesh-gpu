@@ -494,7 +494,7 @@ class Gpu:
                 'remapped_rows',
                 'temperature',
                 'supported_gpu_target_temp',
-                'power_readings',
+                'gpu_power_readings',
                 'clocks',
                 'applications_clocks',
                 'default_applications_clocks',
@@ -687,7 +687,7 @@ class Gpu:
                     if gpu in selected:
                         utilization = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["utilization"])
                         temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
-                        power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["power_readings"])
+                        power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["gpu_power_readings"])
                         line = \
                             f"{gpu:>3}, " \
                             f"{utilization.gpu_util[:-2]: >3}, " \
