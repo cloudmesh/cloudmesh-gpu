@@ -621,19 +621,18 @@ class Gpu:
 
     def watch(self, logfile=None, delay=1.0, repeated=None, dense=False, gpu=None):
         """
-         Continuously monitor GPU status and log the information.
+        Continuously monitor GPU status and log the information.
 
-         Args:
-             logfile (str): Path to the log file.
-             delay (float): Delay between each monitoring iteration.
-             repeated (int): Number of repetitions (-1 for continuous monitoring).
-             dense (bool): Whether to log data in dense format.
-             gpu (list): List of GPU indices to monitor.
+        Args:
+            logfile (str): Path to the log file.
+            delay (float): Delay between each monitoring iteration.
+            repeated (int): Number of repetitions (-1 for continuous monitoring).
+            dense (bool): Whether to log data in dense format.
+            gpu (list): List of GPU indices to monitor.
 
-         Returns:
-             None
-         """
-
+        Returns:
+            None
+        """
         if repeated is None:
             repeated = -1
         else:
@@ -647,14 +646,19 @@ class Gpu:
         signal(SIGINT, self.exit_handler)
 
         stream = sys.stdout
-        if logfile is None:
-            stream = sys.stdout
-        else:
+        if logfile is not None:
             stream = open(logfile, "w")
 
-        print("# ####################################################################################", file=stream, flush=True)
-        print("# time, ", end="", file=stream, flush=True)
-        for i in range(self.count):
+        # Determine the GPUs that are selected
+        if gpu is not None:
+            selected = [int(i) for i in gpu]
+        else:
+            selected = list(range(self.count))
+
+        # Print header only for the selected GPUs
+        # print("# ####################################################################################", file=stream, flush=True)
+        print("time, ", end="", file=stream, flush=True)
+        for i in selected:
             print(
                 f"{i} id, "
                 f"{i} gpu_util %, "
@@ -662,7 +666,7 @@ class Gpu:
                 f"{i} encoder_util %, "
                 f"{i} decoder_util %, "
                 f"{i} gpu_temp C, "
-                f"{i} power_draw W",
+                f"{i} power_draw W, ",
                 end="",
                 file=stream,
                 flush=True)
@@ -670,10 +674,6 @@ class Gpu:
 
         counter = repeated
 
-        if gpu is not None:
-            selected = [int(i) for i in gpu]
-        else:
-            selected = list(range(self.count))
         while self.running:
             try:
                 if counter > 0:
@@ -685,20 +685,20 @@ class Gpu:
 
                 result = [f"{today}{self.sep}{now}"]
 
-                for gpu in range(self.count):
-                    if gpu in selected:
-                        utilization = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["utilization"])
-                        temperature = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["temperature"])
-                        power = dotdict(data["nvidia_smi_log"]["gpu"][gpu]["gpu_power_readings"])
-                        line = \
-                            f"{gpu:>3}, " \
-                            f"{utilization.gpu_util[:-2]: >3}, " \
-                            f"{utilization.memory_util[:-2]: >3}, " \
-                            f"{utilization.encoder_util[:-2]: >3}, " \
-                            f"{utilization.decoder_util[:-2]: >3}, " \
-                            f"{temperature.gpu_temp[:-2]: >5}, " \
-                            f"{power.power_draw[:-2]: >8}"
-                        result.append(line)
+                for i in selected:
+                    utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
+                    temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
+                    power = dotdict(data["nvidia_smi_log"]["gpu"][i]["gpu_power_readings"])
+                    line = (
+                        f"{i:>3}, "
+                        f"{utilization.gpu_util[:-2]: >3}, "
+                        f"{utilization.memory_util[:-2]: >3}, "
+                        f"{utilization.encoder_util[:-2]: >3}, "
+                        f"{utilization.decoder_util[:-2]: >3}, "
+                        f"{temperature.gpu_temp[:-2]: >5}, "
+                        f"{power.power_draw[:-2]: >8}"
+                    )
+                    result.append(line)
 
                 result = ", ".join(result)
                 if dense:
