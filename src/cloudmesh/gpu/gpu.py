@@ -652,8 +652,8 @@ class Gpu:
         else:
             stream = open(logfile, "w")
 
-        print("# ####################################################################################")
-        print("# time, ", end="")
+        print("# ####################################################################################", file=stream)
+        print("# time, ", end="", file=stream)
         for i in range(self.count):
             print(
                 f"{i} id, "
@@ -663,8 +663,9 @@ class Gpu:
                 f"{i} decoder_util %, "
                 f"{i} gpu_temp C, "
                 f"{i} power_draw W",
-                end="")
-        print()
+                end="",
+                file=stream)
+        print(file=stream)
 
         counter = repeated
 
