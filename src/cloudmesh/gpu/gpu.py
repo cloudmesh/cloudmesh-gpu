@@ -655,8 +655,7 @@ class Gpu:
         else:
             selected = list(range(self.count))
 
-        # Print header only for the selected GPUs
-        # print("# ####################################################################################", file=stream, flush=True)
+        # Print header only for the selected GPUs        
         print("time, ", end="", file=stream, flush=True)
         for i in selected:
             print(
@@ -666,7 +665,9 @@ class Gpu:
                 f"{i} encoder_util %, "
                 f"{i} decoder_util %, "
                 f"{i} gpu_temp C, "
-                f"{i} power_draw W, ",
+                f"{i} power_draw W, "
+                f"{i} vram_mem_used MiB, "
+                f"{i} vram_mem_total MiB, ",
                 end="",
                 file=stream,
                 flush=True)
@@ -689,6 +690,8 @@ class Gpu:
                     utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
                     temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
                     power = dotdict(data["nvidia_smi_log"]["gpu"][i]["gpu_power_readings"])
+                    memory = dotdict(data["nvidia_smi_log"]["gpu"][i]["fb_memory_usage"])
+
                     line = (
                         f"{i:>3}, "
                         f"{utilization.gpu_util[:-2]: >3}, "
@@ -696,7 +699,9 @@ class Gpu:
                         f"{utilization.encoder_util[:-2]: >3}, "
                         f"{utilization.decoder_util[:-2]: >3}, "
                         f"{temperature.gpu_temp[:-2]: >5}, "
-                        f"{power.power_draw[:-2]: >8}"
+                        f"{power.power_draw[:-2]: >8}, "
+                        f"{memory.used}, "
+                        f"{memory.total}"
                     )
                     result.append(line)
 
