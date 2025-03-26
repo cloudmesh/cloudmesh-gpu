@@ -231,134 +231,132 @@ class GpuCommand(PluginCommand):
                 print(e)
             return d
 
-        try:
-            gpu = Gpu()
-            if arguments.gpu is None:
-                arguments.gpu = [str(i) for i in range(gpu.count)]
+    
+        gpu = Gpu()
+        if arguments.gpu is None:
+            arguments.gpu = [str(i) for i in range(gpu.count)]
 
-            if arguments.watch:
+        if arguments.watch:
 
-                gpu.watch(logfile=arguments.logfile,
-                          delay=arguments.delay,
-                          repeated=int(arguments["--count"]),
-                          dense=arguments["--dense"],
-                          gpu=arguments.gpu)
+            gpu.watch(logfile=arguments.logfile,
+                        delay=arguments.delay,
+                        repeated=int(arguments["--count"]),
+                        dense=arguments["--dense"],
+                        gpu=arguments.gpu)
 
-                return ""
+            return ""
 
-            elif arguments.probe:
+        elif arguments.probe:
 
-                gpu.probe()
-                return ""
+            gpu.probe()
+            return ""
 
-            elif arguments.show:
+        elif arguments.show:
 
-                file = arguments.FILE
-                output = arguments.output.lower()
-                plot_type = arguments.plot
-                frequency_type = arguments.frequency
+            file = arguments.FILE
+            output = arguments.output.lower()
+            plot_type = arguments.plot
+            frequency_type = arguments.frequency
 
-                result = gpu.graph(file, output, plot_type, frequency_type)
+            result = gpu.graph(file, output, plot_type, frequency_type)
 
-            elif arguments.kill:
+        elif arguments.kill:
 
-                r = Shell.run('ps -ax | fgrep "cms gpu watch"').splitlines()
-                for entry in r:
-                    if "python" in entry:
-                        pid = entry.strip().split()[0]
-                        Shell.kill_pid(pid)
+            r = Shell.run('ps -ax | fgrep "cms gpu watch"').splitlines()
+            for entry in r:
+                if "python" in entry:
+                    pid = entry.strip().split()[0]
+                    Shell.kill_pid(pid)
 
-                return ""
+            return ""
 
-            elif arguments.xml:
-                try:
-                    result = gpu.smi(output="xml")
-                except:
-                    Console.error("nvidia-smi must be installed on the system")
-                    return ""
-
-            elif arguments.json and arguments.pretty:
-                filename = arguments.FILE
-                result = gpu.smi(output="json", filename=filename)
-                result = _select(result, arguments.gpu)
-
-            elif arguments.json:
-                filename = arguments.FILE
-                result = gpu.smi(output="json", filename=filename)
-                result = _select(result, arguments.gpu)
-
-            elif arguments.yaml:
-                result = gpu.smi(output="yaml")
-
-            elif arguments.ps:
-
-                arguments.pretty = True
-                result = gpu.ps()
-                d = []
-                counter = 0
-                for i in result.keys():
-                    if str(i) in arguments.gpu:
-                        for p in result[i]:
-                            counter = counter + 1
-                            p["gpu"] = i
-                            p["job"] = counter
-                            p = dict(p)
-                            if not arguments.detail:
-                                p["process_name"] = p["process_name"].split()[0].strip()
-                                try:
-                                    p["process_name"] = p["process_name"].split("/")[-1]
-                                except:
-                                    pass
-                            d.append(p)
-                    print(Printer.write(d,
-                                        output=arguments.format,
-                                        order=["job", "gpu", "pid", "type", "used_memory", "compute_instance_id",
-                                               "gpu_instance_id", "process_name"]))
-                return ""
-
-            elif arguments.attr:
-                try:
-                    arguments.pretty = True
-                    try:
-                        number = int(arguments.gpu[0])
-                    except:
-                        number = 0
-                
-                    detail = arguments.detail
-                    print (number)
-                    print (detail)
-                    result = gpu.print_attr(gpu=number, detail=detail)
-                    # result  = _select(result, arguments.gpu)
-                except Exception as e:  
-                    print (e)
-
-            elif arguments.system:
-                arguments.pretty = True
-                result = gpu.system()
-                # result  = _select(result, arguments.gpu)
-
-            elif arguments.status:
-                arguments.pretty = True
-                result = gpu.status()
-                # result  = _select(result, arguments.gpu)
-
-            elif arguments.count:
-                arguments.pretty = True
-                result = gpu.count
-
-            else:
-                result = gpu.smi()
-                # result  = _select(result, arguments.gpu)
-
+        elif arguments.xml:
             try:
-                if arguments.pretty:
-                    # result = _select(result, arguments.gpu)
-                    result = json.dumps(result, indent=2)
+                result = gpu.smi(output="xml")
             except:
-                result = None
+                Console.error("nvidia-smi must be installed on the system")
+                return ""
+
+        elif arguments.json and arguments.pretty:
+            filename = arguments.FILE
+            result = gpu.smi(output="json", filename=filename)
+            result = _select(result, arguments.gpu)
+
+        elif arguments.json:
+            filename = arguments.FILE
+            result = gpu.smi(output="json", filename=filename)
+            result = _select(result, arguments.gpu)
+
+        elif arguments.yaml:
+            result = gpu.smi(output="yaml")
+
+        elif arguments.ps:
+
+            arguments.pretty = True
+            result = gpu.ps()
+            d = []
+            counter = 0
+            for i in result.keys():
+                if str(i) in arguments.gpu:
+                    for p in result[i]:
+                        counter = counter + 1
+                        p["gpu"] = i
+                        p["job"] = counter
+                        p = dict(p)
+                        if not arguments.detail:
+                            p["process_name"] = p["process_name"].split()[0].strip()
+                            try:
+                                p["process_name"] = p["process_name"].split("/")[-1]
+                            except:
+                                pass
+                        d.append(p)
+                print(Printer.write(d,
+                                    output=arguments.format,
+                                    order=["job", "gpu", "pid", "type", "used_memory", "compute_instance_id",
+                                            "gpu_instance_id", "process_name"]))
+            return ""
+
+        elif arguments.attr:
+            try:
+                arguments.pretty = True
+                try:
+                    number = int(arguments.gpu[0])
+                except:
+                    number = 0
+            
+                detail = arguments.detail
+                print (number)
+                print (detail)
+                result = gpu.print_attr(gpu=number, detail=detail)
+                # result  = _select(result, arguments.gpu)
+            except Exception as e:  
+                print (e)
+
+        elif arguments.system:
+            arguments.pretty = True
+            result = gpu.system()
+            # result  = _select(result, arguments.gpu)
+
+        elif arguments.status:
+            arguments.pretty = True
+            result = gpu.status()
+            # result  = _select(result, arguments.gpu)
+
+        elif arguments.count:
+            arguments.pretty = True
+            result = gpu.count
+
+        else:
+            result = gpu.smi()
+            # result  = _select(result, arguments.gpu)
+
+        try:
+            if arguments.pretty:
+                # result = _select(result, arguments.gpu)
+                result = json.dumps(result, indent=2)
         except:
             result = None
 
-        print(result)
+
 
         return ""
