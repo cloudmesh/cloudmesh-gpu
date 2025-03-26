@@ -676,49 +676,55 @@ class Gpu:
         counter = repeated
 
         while self.running:
-            try:
-                if counter > 0:
-                    counter = counter - 1
-                    self.running = self.running and counter > 0
-                today = date.today()
-                now = datetime.now().time()  # time object
-                data = self.smi(output="json")
+        
+            if counter > 0:
+                counter = counter - 1
+                self.running = self.running and counter > 0
+            today = date.today()
+            now = datetime.now().time()  # time object
+            data = self.smi(output="json")
 
-                result = [f"{today}{self.sep}{now}"]
+            result = [f"{today}{self.sep}{now}"]
 
-                for i in selected:
-                    utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
-                    temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
-                    gpu_data = data["nvidia_smi_log"]["gpu"][i]
-                    if "gpu_power_readings" in gpu_data:
-                        power = dotdict(gpu_data["gpu_power_readings"])
-                    elif "power_readings" in gpu_data:
-                        power = dotdict(gpu_data["power_readings"])
+            for i in selected:
+                utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
+                temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
+                gpu_data = data["nvidia_smi_log"]["gpu"][i]
+                
+                if "gpu_power_readings" in gpu_data:
+                    power = dotdict(gpu_data["gpu_power_readings"])
+                elif "power_readings" in gpu_data:
+                    power = dotdict(gpu_data["power_readings"])
+                else:
+                    power = dotdict({"power_draw": "N/A"})
+                
+                if "power_draw" not in power:
+                    if "instant_power_draw" in power:
+                        power.power_draw = power.instant_power_draw
                     else:
-                        power = dotdict({"power_draw": "N/A"})
+                        raise RuntimeError("GPU Missing Power Draw field")
 
-                    memory = dotdict(data["nvidia_smi_log"]["gpu"][i]["fb_memory_usage"])
+                memory = dotdict(data["nvidia_smi_log"]["gpu"][i]["fb_memory_usage"])
 
-                    line = (
-                        f"{i:>3}, "
-                        f"{utilization.gpu_util[:-2]: >3}, "
-                        f"{utilization.memory_util[:-2]: >3}, "
-                        f"{utilization.encoder_util[:-2]: >3}, "
-                        f"{utilization.decoder_util[:-2]: >3}, "
-                        f"{temperature.gpu_temp[:-2]: >5}, "
-                        f"{power.power_draw[:-2]: >8}, "
-                        f"{memory.used}, "
-                        f"{memory.total}"
-                    )
-                    result.append(line)
+                line = (
+                    f"{i:>3}, "
+                    f"{utilization.gpu_util[:-2]: >3}, "
+                    f"{utilization.memory_util[:-2]: >3}, "
+                    f"{utilization.encoder_util[:-2]: >3}, "
+                    f"{utilization.decoder_util[:-2]: >3}, "
+                    f"{temperature.gpu_temp[:-2]: >5}, "
+                    f"{power.power_draw[:-2]: >8}, "
+                    f"{memory.used}, "
+                    f"{memory.total}"
+                )
+                result.append(line)
 
-                result = ", ".join(result)
-                if dense:
-                    result = result.replace(" ", "")
-                print(result, file=stream, flush=True)
+            result = ", ".join(result)
+            if dense:
+                result = result.replace(" ", "")
+            print(result, file=stream, flush=True)
 
-            except Exception as e:
-                print(e)
+        print(result)
 
     def __str__(self):
         """
