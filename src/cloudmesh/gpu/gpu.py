@@ -689,7 +689,14 @@ class Gpu:
                 for i in selected:
                     utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
                     temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
-                    power = dotdict(data["nvidia_smi_log"]["gpu"][i]["gpu_power_readings"])
+                    gpu_data = data["nvidia_smi_log"]["gpu"][i]
+                    if "gpu_power_readings" in gpu_data:
+                        power = dotdict(gpu_data["gpu_power_readings"])
+                    elif "power_readings" in gpu_data:
+                        power = dotdict(gpu_data["power_readings"])
+                    else:
+                        power = dotdict({"power_draw": "N/A"})
+
                     memory = dotdict(data["nvidia_smi_log"]["gpu"][i]["fb_memory_usage"])
 
                     line = (
