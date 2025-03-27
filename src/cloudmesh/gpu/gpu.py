@@ -724,8 +724,6 @@ class Gpu:
                 result = result.replace(" ", "")
             print(result, file=stream, flush=True)
 
-        print(result)
-
     def __str__(self):
         """
         Return a string representation of the Gpu object.

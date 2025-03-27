@@ -357,6 +357,6 @@ class GpuCommand(PluginCommand):
         except:
             result = None
 
-
+        print(result)
 
         return ""
