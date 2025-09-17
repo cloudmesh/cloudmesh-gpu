@@ -59,6 +59,8 @@ from cloudmesh.common.util import banner
 from tabulate import tabulate
 from cloudmesh.common.util import csv_to_list
 
+import threading
+
 class Gpu:
     """
       The `Gpu` class provides functionality to probe, monitor, and analyze GPU information using nvidia-smi.
@@ -102,6 +104,7 @@ class Gpu:
         except KeyError:
             raise RuntimeError("nvidia-smi not installed.")
         self.gpus = 0
+        self._stop_evt = None
 
     def probe(self):
         """
@@ -369,6 +372,8 @@ class Gpu:
         # Handle any cleanup here
         print('SIGINT or CTRL-C detected. Exiting gracefully')
         self.running = False
+        if self._stop_evt is not None:
+            self._stop_evt.set()
 
     @property
     def count(self):
@@ -619,110 +624,145 @@ class Gpu:
             result = None
         return result
 
-    def watch(self, logfile=None, delay=1.0, repeated=None, dense=False, gpu=None):
+    def watch(self, logfile=None, delay=1.0, repeated=None, dense=False, gpu=None,
+          install_signal_handler=True, stop_event=None):
         """
         Continuously monitor GPU status and log the information.
 
         Args:
-            logfile (str): Path to the log file.
-            delay (float): Delay between each monitoring iteration.
-            repeated (int): Number of repetitions (-1 for continuous monitoring).
-            dense (bool): Whether to log data in dense format.
-            gpu (list): List of GPU indices to monitor.
-
-        Returns:
-            None
+            logfile (str): Path to the log file (None => stdout).
+            delay (float): Seconds between samples.
+            repeated (int): Number of samples; -1 for infinite.
+            dense (bool): If True, remove spaces in CSV.
+            gpu (list[int]|None): GPU indices to monitor (None => all visible).
+            install_signal_handler (bool): Only set SIGINT handler when running
+                in the main thread. Set False when calling from a background thread.
+            stop_event (threading.Event|None): External event to stop the loop.
         """
-        if repeated is None:
-            repeated = -1
-        else:
-            repeated = int(repeated)
 
+        # normalize counters and delay
         try:
             delay = float(delay)
-        except Exception as e:
+        except Exception:
             delay = 1.0
 
-        signal(SIGINT, self.exit_handler)
-
-        stream = sys.stdout
-        if logfile is not None:
-            stream = open(logfile, "w")
-
-        # Determine the GPUs that are selected
-        if gpu is not None:
-            selected = [int(i) for i in gpu]
+        if repeated is None:
+            counter = -1
         else:
-            selected = list(range(self.count))
+            try:
+                counter = int(repeated)
+            except Exception:
+                counter = -1
 
-        # Print header only for the selected GPUs        
-        print("time, ", end="", file=stream, flush=True)
-        for i in selected:
-            print(
-                f"{i} id, "
-                f"{i} gpu_util %, "
-                f"{i} memory_util %, "
-                f"{i} encoder_util %, "
-                f"{i} decoder_util %, "
-                f"{i} gpu_temp C, "
-                f"{i} power_draw W, "
-                f"{i} vram_mem_used MiB, "
-                f"{i} vram_mem_total MiB, ",
-                end="",
-                file=stream,
-                flush=True)
-        print(file=stream, flush=True)
+        # fresh run state
+        self.running = True
 
-        counter = repeated
+        # cooperative stop
+        if stop_event is None:
+            stop_event = threading.Event()
+        self._stop_evt = stop_event
 
-        while self.running:
-        
-            if counter > 0:
-                counter = counter - 1
-                self.running = self.running and counter > 0
-            today = date.today()
-            now = datetime.now().time()  # time object
-            data = self.smi(output="json")
+        # install SIGINT handler only if allowed AND we're in the main thread
+        if install_signal_handler and threading.current_thread() is threading.main_thread():
+            signal(SIGINT, self.exit_handler)
 
-            result = [f"{today}{self.sep}{now}"]
+        # output stream handling
+        stream = sys.stdout
+        should_close = False
+        if logfile:
+            stream = open(logfile, "w")
+            should_close = True
 
+        try:
+            # pick GPUs
+            if gpu is not None:
+                selected = [int(i) for i in gpu]
+            else:
+                selected = list(range(self.count))
+
+            # header (only for selected GPUs)
+            print("time, ", end="", file=stream, flush=True)
             for i in selected:
-                utilization = dotdict(data["nvidia_smi_log"]["gpu"][i]["utilization"])
-                temperature = dotdict(data["nvidia_smi_log"]["gpu"][i]["temperature"])
-                gpu_data = data["nvidia_smi_log"]["gpu"][i]
-                
-                if "gpu_power_readings" in gpu_data:
-                    power = dotdict(gpu_data["gpu_power_readings"])
-                elif "power_readings" in gpu_data:
-                    power = dotdict(gpu_data["power_readings"])
-                else:
-                    power = dotdict({"power_draw": "N/A"})
-                
-                if "power_draw" not in power:
-                    if "instant_power_draw" in power:
-                        power.power_draw = power.instant_power_draw
-                    else:
-                        raise RuntimeError("GPU Missing Power Draw field")
-
-                memory = dotdict(data["nvidia_smi_log"]["gpu"][i]["fb_memory_usage"])
-
-                line = (
-                    f"{i:>3}, "
-                    f"{utilization.gpu_util[:-2]: >3}, "
-                    f"{utilization.memory_util[:-2]: >3}, "
-                    f"{utilization.encoder_util[:-2]: >3}, "
-                    f"{utilization.decoder_util[:-2]: >3}, "
-                    f"{temperature.gpu_temp[:-2]: >5}, "
-                    f"{power.power_draw[:-2]: >8}, "
-                    f"{memory.used}, "
-                    f"{memory.total}"
+                print(
+                    f"{i} id, "
+                    f"{i} gpu_util %, "
+                    f"{i} memory_util %, "
+                    f"{i} encoder_util %, "
+                    f"{i} decoder_util %, "
+                    f"{i} gpu_temp C, "
+                    f"{i} power_draw W, "
+                    f"{i} vram_mem_used MiB, "
+                    f"{i} vram_mem_total MiB, ",
+                    end="",
+                    file=stream,
+                    flush=True
                 )
-                result.append(line)
+            print(file=stream, flush=True)
 
-            result = ", ".join(result)
-            if dense:
-                result = result.replace(" ", "")
-            print(result, file=stream, flush=True)
+            # loop
+            while self.running and not stop_event.is_set():
+                if counter > 0:
+                    counter -= 1
+                    if counter == 0:
+                        self.running = False
+
+                today = date.today()
+                now = datetime.now().time()
+                data = self.smi(output="json")
+
+                parts = [f"{today}{self.sep}{now}"]
+
+                for i in selected:
+                    try:
+                        g = data["nvidia_smi_log"]["gpu"][i]
+                        utilization = dotdict(g["utilization"])
+                        temperature = dotdict(g["temperature"])
+
+                        if "gpu_power_readings" in g:
+                            power = dotdict(g["gpu_power_readings"])
+                        elif "power_readings" in g:
+                            power = dotdict(g["power_readings"])
+                        else:
+                            power = dotdict({"power_draw": "N/A"})
+
+                        if "power_draw" not in power:
+                            if "instant_power_draw" in power:
+                                power.power_draw = power.instant_power_draw
+                            else:
+                                power.power_draw = "N/A"
+
+                        memory = dotdict(g["fb_memory_usage"])
+
+                        parts.append(
+                            f"{i:>3}, "
+                            f"{utilization.gpu_util[:-2]: >3}, "
+                            f"{utilization.memory_util[:-2]: >3}, "
+                            f"{utilization.encoder_util[:-2]: >3}, "
+                            f"{utilization.decoder_util[:-2]: >3}, "
+                            f"{temperature.gpu_temp[:-2]: >5}, "
+                            f"{(power.power_draw[:-2] if power.power_draw != 'N/A' else 'N/A'): >8}, "
+                            f"{memory.used}, "
+                            f"{memory.total}"
+                        )
+                    except Exception:
+                        # keep CSV width stable even if one GPU read fails
+                        parts.append(f"{i:>3}, N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A")
+
+                line = ", ".join(parts)
+                if dense:
+                    line = line.replace(" ", "")
+                print(line, file=stream, flush=True)
+
+                # sleep, but wake early if stop_event is set
+                if delay > 0 and stop_event.wait(delay):
+                    break
+
+        finally:
+            if should_close:
+                try:
+                    stream.close()
+                except Exception:
+                    pass
 
     def __str__(self):
         """
